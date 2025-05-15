@@ -5,10 +5,32 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import AuthProvider from "./providers/authContext";
+import { ToastContainer } from "react-toastify";
+import { CartProvider } from "./providers/cartContext";
+import { getToken } from "./services/session.server";
+import { FavoritesService } from "./api/api.favorites";
+import type { Favorites } from "./types/favorite";
+import { FavoritesProvider } from "./providers/favoritesContext";
+
+export async function loader({ request }: Route.ActionArgs) {
+  const token = await getToken(request); // Получить пользователя из сессии
+
+  if (!token) return { favoriteMenuItemIds: [] };
+
+  const favorites = await FavoritesService.fetchFavorites(token);
+
+  const favoriteMenuItemIds = favorites.map(
+    (fav: Favorites) => fav.menuItem.id
+  );
+
+  return { favoriteMenuItemIds };
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -25,7 +47,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -34,6 +56,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <ToastContainer />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -42,7 +65,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const { favoriteMenuItemIds } = useLoaderData<typeof loader>();
+
+  return (
+    <FavoritesProvider initialFavorites={favoriteMenuItemIds}>
+      <CartProvider>
+        <AuthProvider>
+          <Outlet />
+        </AuthProvider>
+      </CartProvider>
+    </FavoritesProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

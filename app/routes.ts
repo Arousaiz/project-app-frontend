@@ -1,3 +1,37 @@
-import { type RouteConfig, index } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  layout,
+  route,
+} from "@react-router/dev/routes";
 
-export default [index("routes/home.tsx")] satisfies RouteConfig;
+export default [
+  route("/login", "pages/Login.tsx"),
+  route("/register", "pages/Register.tsx"),
+  route("/restore-pass", "pages/RestorePage.tsx"),
+  route("/reset-pass", "pages/ResetPassPage.tsx"),
+  route("/logout", "routes/logout.ts"),
+  layout("./components/Layouts/Layout.tsx", [
+    index("./pages/HomePage.tsx"),
+    route("/about", "./pages/About.tsx"),
+    route("/contact", "./pages/Contact.tsx"),
+    route("/faq", "./pages/FAQ.tsx"),
+    route("/privacy", "./pages/PrivacyPolicy.tsx"),
+    route("/terms", "./pages/TermsOfService.tsx"),
+    route("/profile/settings", "./pages/Profile.tsx"),
+    route("/profile/address", "./routes/Profile/profile-address.tsx"),
+    route("/profile/reviews", "./routes/Profile/profile-reviews.tsx"),
+    route("/profile/orders", "./routes/Profile/profile-orders.tsx"),
+    route("/profile/favorites", "./routes/Profile/profile-favorites.tsx"),
+    route("/test", "routes/home.tsx"),
+    route("/restaurant/:id", "./pages/RestaurantPage.tsx"),
+    route("/order", "./routes/place-order.tsx"),
+  ]),
+  route("/.well-known/appspecific/:path", "./routes/action.stfuplz.ts"),
+  route("action/set-city", "./routes/action.set-city.ts"),
+  route("action/search", "./routes/action.search.ts"),
+  route("action/update-info", "./routes/action.update-info.ts"),
+  route("action/update-address", "./routes/action.update-address.ts"),
+  route("action/favorites", "./routes/action.favorites.ts"),
+  route("action/reviews", "./routes/action.review.ts"),
+] satisfies RouteConfig;
