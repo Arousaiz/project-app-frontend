@@ -12,7 +12,7 @@ import InputWithIcon from "./InputWithIcon";
 import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/20/solid";
 import SubmitButton from "./SubmitButton";
 import { addressSchema } from "~/zodScheme/profileSchema";
-import type { Address } from "~/types/address";
+import type { Addresses } from "~/types/address";
 import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "./Select";
@@ -31,7 +31,7 @@ export default function OrderForm({
   userId,
   restaurantId,
 }: {
-  address?: Address | null;
+  address?: Addresses | null;
   restaurantId: string;
   userId: string;
 }) {
@@ -63,7 +63,7 @@ export default function OrderForm({
       userId,
       restaurantId,
       data as {
-        address: Address;
+        address: Addresses;
         paymentMethod: PaymentMethod;
         deliveryTime: Date;
       }
@@ -157,7 +157,7 @@ function createOrderFromCart(
   cart: CartMenuItem[],
   userId: string,
   restaurantId: string,
-  form: { address: Address; paymentMethod: PaymentMethod; deliveryTime: Date }
+  form: { address: Addresses; paymentMethod: PaymentMethod; deliveryTime: Date }
 ): CreateOrder {
   const orderItems: CreateOrderItem[] = cart.map((item) => ({
     menuItemId: item.id,

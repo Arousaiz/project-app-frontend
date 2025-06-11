@@ -1,19 +1,21 @@
-import type { Address } from "./address";
-import type { MenuItem } from "./menuItem";
-import type { Restaurant } from "./restaurant";
-import type { User } from "./user";
+import type { Addresses } from "./address";
+import type { MenuItems } from "./menuItem";
+import type { Restaurants } from "./restaurant";
+import type { Users } from "./user";
 
-export type Order = {
+export type Orders = {
   id: string;
   price: number;
   discount: number;
+  comment: string;
   paymentMethod: PaymentMethod;
   orderStatus: OrderStatus;
+  paymentId: string;
   orderTime: Date;
   deliveryDetails: DeliveryDetails;
-  orderItems: OrderItem[];
-  user: User;
-  restaurant: Restaurant;
+  orderItems: OrderItems[];
+  user: Users;
+  restaurant: Restaurants;
 };
 
 export type CreateOrder = {
@@ -32,24 +34,24 @@ export type CreateOrderItem = {
 
 export type CreateDeliveryDetails = {
   deliveryTime: Date;
-  address: Address;
+  address: Addresses;
 };
 
 export type DeliveryDetails = {
   id: string;
   deliveryStatus: DeliveryStatus;
   deliveryTime: Date;
-  address: Address;
-  order: Order;
+  ActualDeliveryTime: Date;
+  address: Addresses;
 };
 
-export type OrderItem = {
+export type OrderItems = {
   id: string;
   menuItemId: string;
   price: number;
   count: number;
-  order: Order;
-  menuItem: MenuItem;
+  order: Orders;
+  menuItem: MenuItems;
 };
 
 export declare enum DeliveryStatus {

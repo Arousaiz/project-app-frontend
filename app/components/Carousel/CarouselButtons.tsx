@@ -11,6 +11,7 @@ import {
   ArrowRightCircleIcon,
   ArrowRightIcon,
 } from "@heroicons/react/20/solid";
+import PrimaryButton from "../Buttons/PrimaryButton";
 
 type UsePrevNextButtonsType = {
   prevBtnDisabled: boolean;
@@ -57,32 +58,24 @@ export const usePrevNextButtons = (
 
 type PropType = ComponentPropsWithRef<"button">;
 
-export const PrevButton: React.FC<PropType> = (props) => {
+export function PrevButton(props: PropType) {
   const { children, ...restProps } = props;
 
   return (
-    <button
-      className="items-center text-white bg-blue-700 dark:bg-blue-800 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full dark:hover:bg-blue-600 dark:focus:ring-blue-600"
-      type="button"
-      {...restProps}
-    >
+    <PrimaryButton className="" {...restProps}>
       <ArrowLeftCircleIcon className="size-8" />
       {children}
-    </button>
+    </PrimaryButton>
   );
-};
+}
 
 export const NextButton: React.FC<PropType> = (props) => {
   const { children, ...restProps } = props;
 
   return (
-    <button
-      className="items-center text-white bg-blue-700 dark:bg-blue-800 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full dark:hover:bg-blue-600 dark:focus:ring-blue-600"
-      type="button"
-      {...restProps}
-    >
+    <PrimaryButton className="" {...restProps}>
       <ArrowRightCircleIcon className="size-8" />
       {children}
-    </button>
+    </PrimaryButton>
   );
 };

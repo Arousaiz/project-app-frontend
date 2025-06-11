@@ -1,9 +1,9 @@
-export default function FormLogo(){
-    return(
-        <img
-            alt="Food delivery"
-            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=blue&shade=600"
-            className="mx-auto h-10 w-auto"
-        />
-    )
+export default function FormLogo() {
+  return (
+    <img
+      alt="Food delivery"
+      src="/app/assets/logo_temp.png"
+      className="mx-auto h-16 w-auto"
+    />
+  );
 }

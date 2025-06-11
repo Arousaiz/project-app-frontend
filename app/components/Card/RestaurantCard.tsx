@@ -1,42 +1,49 @@
 import { BookmarkIcon, StarIcon, TruckIcon } from "@heroicons/react/20/solid";
 import { Link, redirect } from "react-router";
-import type { Restaurant } from "~/types/restaurant";
+import type { RestaurantCardInfo } from "~/types/restaurant";
+import PrimaryBadge from "../Badges/PrimaryBadge";
+import SecondaryBadge from "../Badges/SecondaryBadge";
+import { Card, CardContent, CardFooter } from "./Card";
+import ImageWithLoadingAndFallback from "./ImageWithFallback";
 
-export default function RestaurantCard({
-  restaurant,
-}: {
-  restaurant?: Restaurant;
-}) {
+type RestaurantCardProps = {
+  restaurant: RestaurantCardInfo;
+};
+
+export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
+  const deliveryTime = Math.floor(Math.random() * (60 - 30 + 1)) + 30;
+
   return (
-    <Link to={`/restaurant/${restaurant?.id}`}>
-      <div className="w-64 md:w-80 h-64 mx-auto my-4 bg-white dark:bg-gray-900 rounded-lg shadow flex flex-col relative mr-4 hover:-translate-y-2">
-        <img src="/app/assets/orig.jpg" className="rounded-t h-8/12"></img>
-        <div className="flex flex-row mx-4 mt-1 justify-between">
-          <p className=" text-gray-700 dark:text-white font-bold line-clamp-1">
-            {restaurant?.name ? restaurant?.name : "Mak.by"}
-          </p>
-          <div className="flex flex-row">
-            <p className=" text-gray-700 dark:text-white font-bold">
-              {restaurant?.rating ? restaurant.rating : "No rating"}
-            </p>
-            <StarIcon className="size-4 mt-1 ml-1"></StarIcon>
+    <Link to={`/restaurant/${restaurant?.id}`} className="">
+      <Card className="w-full h-full relative hover:-translate-y-2">
+        <ImageWithLoadingAndFallback
+          size="h-9/12 md:h-8/12"
+          src="/app/assets/placeholder-image.jpg"
+          fallbackSrc="/app/assets/placeholder-image.jpg"
+          alt={`Изображение ресторана ${restaurant?.name}`}
+          className="rounded-t-xl"
+          isInCard={true}
+        ></ImageWithLoadingAndFallback>
+        <CardContent className="flex-col flex pt-1">
+          <div className="flex flex-row justify-between">
+            <p className="font-bold line-clamp-1">{restaurant?.name}</p>
+            <div className="flex items-center">
+              <p className="font-bold">
+                {restaurant?.rating ? restaurant.rating : "No rating"}
+              </p>
+              <StarIcon className="size-4"></StarIcon>
+            </div>
           </div>
-        </div>
-        <div className="flex mx-4">
-          <TruckIcon className="size-5"></TruckIcon>
-          <p className="text-gray-700 dark:text-white mx-1 line-clamp-1">
-            30-40 minutes
-          </p>
-        </div>
-        <div className="flex mx-4">
-          <div className="rounded-3xl text-gray-200 bg-blue-600 dark:bg-sky-800 text-center px-1 text-sm truncate select-none">
-            Free delivery
+          <div className="flex">
+            <TruckIcon className="size-5"></TruckIcon>
+            <p className="px-1 line-clamp-1">{deliveryTime}~ минут</p>
           </div>
-          <div className="rounded-3xl text-gray-200 bg-blue-600 dark:bg-sky-800 text-center mx-1 px-1 text-sm truncate select-none">
-            -20% for some items
-          </div>
-        </div>
-      </div>
+        </CardContent>
+        <CardFooter className="gap-2 py-1 md:py-2">
+          <PrimaryBadge>Бесплатная доставка</PrimaryBadge>
+          <SecondaryBadge>-20% скидки</SecondaryBadge>
+        </CardFooter>
+      </Card>
     </Link>
   );
 }

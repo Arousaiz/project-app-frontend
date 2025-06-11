@@ -1,45 +1,68 @@
 import { MinusIcon, PlusIcon } from "@heroicons/react/20/solid";
-import { useState } from "react";
+import React, { useState } from "react";
+
+type CounterButtonProps = {
+  count: number;
+  minusClick: () => void;
+  plusClick: () => void;
+  deleteFromCart: () => void;
+};
 
 export default function CounterButton({
   count,
   minusClick,
   plusClick,
   deleteFromCart,
-}: {
-  count: number;
-  minusClick: () => void;
-  plusClick: () => void;
-  deleteFromCart: () => void;
-}) {
+}: CounterButtonProps) {
   return (
-    <div className="relative flex items-center max-w-20 rounded-lg text-white dark:text-white">
-      <button
-        type="button"
-        onClick={() => plusClick()}
-        className="bg-blue-700 dark:bg-gray-800 hover:bg-blue-600 dark:hover:bg-gray-700 focus:ring-gray-400 focus:ring h-8 rounded-s-lg border border-r border-blue-500 dark:border-gray-900"
+    <div className="relative flex items-center max-w-20 rounded-lg">
+      <PlusMinusButtons
+        onClick={(e) => {
+          e.stopPropagation();
+          plusClick();
+        }}
       >
         <PlusIcon className="size-6 p-1"></PlusIcon>
-      </button>
+      </PlusMinusButtons>
       <input
         type="text"
-        className="bg-blue-700 dark:bg-gray-800 hover:bg-blue-600 dark:hover:bg-gray-700  h-8 w-full block py-2.5 text-center border-t border-b border-blue-500 dark:border-gray-900"
+        className="snd-button h-8 w-full block py-2.5 text-center"
+        disabled={true}
         pattern="/^[0-9]*$/"
         value={count}
       ></input>
-      <button
-        type="button"
-        onClick={() => {
+      <PlusMinusButtons
+        right={true}
+        onClick={(e) => {
+          e.stopPropagation();
           if (count === 1) {
             return deleteFromCart();
           } else {
             return minusClick();
           }
         }}
-        className="bg-blue-700 dark:bg-gray-800 hover:bg-blue-600 dark:hover:bg-gray-700 focus:ring-gray-400 focus:ring h-8 rounded-e-lg border border-l border-blue-500 dark:border-gray-900"
       >
         <MinusIcon className="size-6 p-1"></MinusIcon>
-      </button>
+      </PlusMinusButtons>
     </div>
+  );
+}
+
+export function PlusMinusButtons({
+  children,
+  onClick,
+  className,
+  right = false,
+}: React.ComponentProps<"button"> & { right?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`snd-button h-8 ${
+        right ? "rounded-e-lg " : "rounded-s-lg "
+      } ${className}`}
+    >
+      {children}
+    </button>
   );
 }

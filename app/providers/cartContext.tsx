@@ -1,86 +1,190 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import type { Category } from "~/types/category";
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useMemo,
+  type ReactNode,
+  useEffect,
+} from "react";
+import type { Categories } from "~/types/category";
+
+const loadCartFromStorage = (): CartState => {
+  try {
+    const savedCart = sessionStorage.getItem("cart");
+    return savedCart
+      ? JSON.parse(savedCart)
+      : {
+          restaurantId: null,
+          items: {},
+        };
+  } catch {
+    return {
+      restaurantId: null,
+      items: {},
+    };
+  }
+};
 
 export type CartMenuItem = {
   id: string;
   name: string;
   description: string;
   price: number;
-  category: Category;
+  category: Categories;
   count: number;
 };
 
+type CartItemsMap = Record<string, CartMenuItem>;
+
+type CartState = {
+  restaurantId: string | null;
+  items: CartItemsMap;
+};
+
 type CartContextType = {
-  cart: CartMenuItem[];
-  addToCart: (item: Omit<CartMenuItem, "count">) => void;
+  cart: CartState;
+  addToCart: (
+    item: Omit<CartMenuItem, "count">,
+    restaurantId: string,
+    quantity?: number
+  ) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
   increaseQuantity: (id: string) => void;
   decreaseQuantity: (id: string) => void;
   isItemInCart: (id: string) => boolean;
-  getTotalPrice: () => number;
+  totalPrice: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartMenuItem[]>([]);
+type Action =
+  | {
+      type: "ADD";
+      item: Omit<CartMenuItem, "count">;
+      restaurantId: string;
+      quantity?: number;
+    }
+  | { type: "REMOVE"; id: string }
+  | { type: "INCREASE"; id: string }
+  | { type: "DECREASE"; id: string }
+  | { type: "CLEAR" };
 
-  const addToCart = (item: Omit<CartMenuItem, "count">) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === item.id ? { ...i, count: i.count + 1 } : i
-        );
+function cartReducer(state: CartState, action: Action): CartState {
+  switch (action.type) {
+    case "ADD": {
+      if (state.restaurantId && state.restaurantId !== action.restaurantId) {
+        return state;
       }
-      return [...prev, { ...item, count: 1 }];
-    });
+      const quantity = action.quantity ?? 1;
+      const existing = state.items[action.item.id];
+      return {
+        restaurantId: action.restaurantId,
+        items: {
+          ...state.items,
+          [action.item.id]: existing
+            ? { ...existing, count: existing.count + quantity }
+            : { ...action.item, count: quantity },
+        },
+      };
+    }
+    case "REMOVE": {
+      const newItems = { ...state.items };
+      delete newItems[action.id];
+      const isEmpty = Object.keys(newItems).length === 0;
+      return {
+        restaurantId: isEmpty ? null : state.restaurantId,
+        items: newItems,
+      };
+    }
+    case "INCREASE": {
+      const item = state.items[action.id];
+      if (!item) return state;
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [action.id]: { ...item, count: item.count + 1 },
+        },
+      };
+    }
+    case "DECREASE": {
+      const item = state.items[action.id];
+      if (!item || item.count <= 1) return state;
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [action.id]: { ...item, count: item.count - 1 },
+        },
+      };
+    }
+    case "CLEAR":
+      return {
+        restaurantId: null,
+        items: {},
+      };
+    default:
+      return state;
+  }
+}
+
+export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const [state, dispatch] = useReducer(cartReducer, {
+    restaurantId: null,
+    items: {},
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("cart", JSON.stringify(state));
+  }, [state]);
+
+  const addToCart = (
+    item: Omit<CartMenuItem, "count">,
+    restaurantId: string,
+    quantity = 1
+  ) => {
+    dispatch({ type: "ADD", item, restaurantId, quantity });
   };
 
   const removeFromCart = (id: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+    dispatch({ type: "REMOVE", id });
   };
 
-  const clearCart = () => setCart([]);
-
   const increaseQuantity = (id: string) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, count: item.count + 1 } : item
-      )
-    );
+    dispatch({ type: "INCREASE", id });
   };
 
   const decreaseQuantity = (id: string) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id && item.count > 1
-          ? { ...item, count: item.count - 1 }
-          : item
-      )
-    );
+    dispatch({ type: "DECREASE", id });
+  };
+
+  const clearCart = () => {
+    dispatch({ type: "CLEAR" });
   };
 
   const isItemInCart = (id: string) => {
-    return cart.some((item) => item.id === id);
+    return Boolean(state.items[id]);
   };
 
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.count, 0);
-  };
+  const totalPrice = useMemo(() => {
+    return Object.values(state.items).reduce(
+      (sum, item) => sum + item.price * item.count,
+      0
+    );
+  }, [state]);
 
   return (
     <CartContext.Provider
       value={{
-        cart,
+        cart: state,
         addToCart,
         removeFromCart,
         clearCart,
         increaseQuantity,
         decreaseQuantity,
         isItemInCart,
-        getTotalPrice,
+        totalPrice,
       }}
     >
       {children}

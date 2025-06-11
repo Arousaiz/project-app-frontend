@@ -1,25 +1,50 @@
-import type { register } from "module";
-import { instance } from "./api.config.js";
+import axios from "axios";
+import { instance } from "./api.config";
 
-export interface AuthInterface {
+export type AuthInterface = {
   username: string;
   password: string;
-}
+};
+
+export type UserPayload = {
+  userId: string;
+  username: string;
+  role: string;
+};
 
 export const AuthService = {
   login(data: AuthInterface) {
-    return instance.post("/login", data).then((res) => res.data.data.token);
+    return instance.post("/login", data).then((response) => {
+      return response;
+    });
   },
 
-  register(data: AuthInterface) {
-    return instance.post("/register", data).then((res) => res.data.message);
+  register(data: AuthInterface): Promise<string> {
+    return instance.post("/register", data).then((response) => {
+      return response?.data?.message;
+    });
   },
 
-  refreshToken() {
-    return instance.get("/refresh");
+  checkAuth(): Promise<UserPayload> {
+    return axios
+      .post(
+        "http://localhost:3000/me",
+        {},
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      )
+      .then((response) => {
+        return response?.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return null;
+      });
   },
 
   logout() {
-    return instance.post("/logout");
+    return instance.post("logout");
   },
 };

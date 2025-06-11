@@ -6,6 +6,7 @@ import type {
   RegisterOptions,
   UseFormRegister,
 } from "react-hook-form";
+import ErrorMessage from "./ErrorMessage";
 
 export default function Input({
   register,
@@ -38,14 +39,10 @@ export default function Input({
         placeholder={placeholder}
         min={min}
         max={max}
-        className="block w-full rounded-md bg-white dark:bg-gray-900 px-3 py-1.5 text-base text-gray-900 dark:text-gray-200 outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-600 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 dark:focus:outline-blue-600 sm:text-sm/6"
+        className="input input-padding"
         {...rest}
       />
-      {errorField && (
-        <p className="mt-2 text-red-500" role="alert">
-          {errorField?.message as string}
-        </p>
-      )}
+      <ErrorMessage errorField={errorField}></ErrorMessage>
     </div>
   );
 }

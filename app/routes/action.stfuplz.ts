@@ -1,9 +1,9 @@
 import type { Route } from "../+types/root";
 
-export async function action({ request }: Route.ActionArgs) {
+export async function clientAction({ request }: Route.ActionArgs) {
   return null;
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function clientLoader({ request }: Route.LoaderArgs) {
   return null;
 }

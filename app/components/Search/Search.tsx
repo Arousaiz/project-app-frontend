@@ -3,20 +3,32 @@ import SearchBar from "./SearchBar/SearchBar";
 import SearchResult from "./SearchResult/SearchResult";
 import { RestaurantService } from "~/api/api.restaurant";
 import { useFetcher } from "react-router";
-import type { Restaurant } from "~/types/restaurant";
+import { useDebounce } from "@uidotdev/usehooks";
+import type { Restaurants } from "~/types/restaurant";
+import { useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 
 export default function Search() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Restaurant[]>([]);
+  const debouncedQuery = useDebounce(query, 300);
+  const { data, isLoading, isError, error } = useQuery<
+    Restaurants[],
+    AxiosError
+  >({
+    queryKey: ["search", debouncedQuery],
+    queryFn: () =>
+      RestaurantService.searchRestaurants(
+        localStorage.getItem("city")!,
+        debouncedQuery
+      ),
+    enabled: !!debouncedQuery.trim(),
+  });
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const fetcher = useFetcher();
 
   useEffect(() => {
-    if (fetcher.data?.res) {
-      setResults(fetcher.data.res);
-    }
-  }, [fetcher.data]);
+    setIsOpen(true);
+  }, [debouncedQuery]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -31,23 +43,14 @@ export default function Search() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  useEffect(() => {
-    if (query) {
-      fetcher.submit(JSON.stringify(query), {
-        method: "post",
-        encType: "application/json",
-        action: "/action/search",
-      });
-      setIsOpen(true);
-    }
-  }, [query]);
-
   return (
     <div ref={wrapperRef}>
       <SearchBar
-        results={results}
+        results={data}
         isOpen={isOpen}
+        query={query}
         setQuery={setQuery}
+        isLoading={isLoading}
       ></SearchBar>
     </div>
   );

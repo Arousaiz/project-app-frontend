@@ -1,3 +1,4 @@
+import type { ChangeEvent } from "react";
 import type {
   UseFormRegister,
   FieldValues,
@@ -5,22 +6,37 @@ import type {
 } from "react-hook-form";
 
 export default function Select({
-  register,
-  validateOptions,
   options,
   name,
   children,
+  className,
+  value,
+  defaultValue,
+  onChange,
   ...rest
 }: React.PropsWithChildren<{
-  register: UseFormRegister<any>;
-  validateOptions?: RegisterOptions<FieldValues, string>;
   name: string;
   options?: string[];
+  className?: string;
+  value?: string; // For controlled component
+  defaultValue?: string; // For uncontrolled component
+  onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
 }>) {
   return (
-    <select {...register(name, validateOptions)} {...rest}>
+    <select
+      name={name}
+      className={`input input-padding ${className}`} // Merge custom classes
+      value={value} // Controlled
+      defaultValue={defaultValue} // Uncontrolled
+      onChange={onChange} // Handle changes
+      {...rest}
+    >
       {options?.map((value) => (
-        <option key={value} value={value}>
+        <option
+          className="bg-popover text-popover-foreground overflow-x-hidden overflow-y-auto rounded-md border shadow-md hover:bg-accent"
+          key={value}
+          value={value}
+        >
           {value}
         </option>
       ))}

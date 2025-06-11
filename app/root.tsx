@@ -10,27 +10,17 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import AuthProvider from "./providers/authContext";
+import { AuthProvider } from "./providers/authContext";
 import { ToastContainer } from "react-toastify";
 import { CartProvider } from "./providers/cartContext";
-import { getToken } from "./services/session.server";
 import { FavoritesService } from "./api/api.favorites";
 import type { Favorites } from "./types/favorite";
 import { FavoritesProvider } from "./providers/favoritesContext";
-
-export async function loader({ request }: Route.ActionArgs) {
-  const token = await getToken(request); // Получить пользователя из сессии
-
-  if (!token) return { favoriteMenuItemIds: [] };
-
-  const favorites = await FavoritesService.fetchFavorites(token);
-
-  const favoriteMenuItemIds = favorites.map(
-    (fav: Favorites) => fav.menuItem.id
-  );
-
-  return { favoriteMenuItemIds };
-}
+import { queryClient } from "./api/api.config";
+import React, { useEffect } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import Spinner from "./components/loading-spinner";
+import { ThemeProvider } from "./components/theme/theme-provider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,12 +35,41 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export async function clientLoader({
+  request,
+  params,
+}: Route.ClientLoaderArgs) {
+  return null;
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+          (function() {
+            try {
+              const theme = localStorage.getItem('vite-ui-theme');
+              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              const root = document.documentElement;
+              if (theme === 'dark' || (!theme && prefersDark)) {
+                root.classList.add('dark');
+                root.classList.remove('light');
+              } else {
+                root.classList.add('light');
+                root.classList.remove('dark');
+              }
+            } catch (e) {
+              // fail silently
+            }
+          })();
+          `,
+          }}
+        />
         <Meta />
         <Links />
       </head>
@@ -65,16 +84,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { favoriteMenuItemIds } = useLoaderData<typeof loader>();
+  useEffect(() => {
+    if (!localStorage.getItem("city")) {
+      localStorage.setItem("city", "Минск");
+    }
+  }, []);
+
+  const [queryClientToProvide] = React.useState(() => queryClient);
 
   return (
-    <FavoritesProvider initialFavorites={favoriteMenuItemIds}>
-      <CartProvider>
-        <AuthProvider>
-          <Outlet />
-        </AuthProvider>
-      </CartProvider>
-    </FavoritesProvider>
+    <QueryClientProvider client={queryClientToProvide}>
+      <ThemeProvider>
+        <CartProvider>
+          <AuthProvider>
+            <Outlet />
+          </AuthProvider>
+        </CartProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+export function HydrateFallback() {
+  return (
+    <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 bg-background/50 text-foreground/50 animate-fade-out">
+      <Spinner className="h-52 w-52" />
+    </div>
   );
 }
 

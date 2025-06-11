@@ -1,46 +1,52 @@
-import { Menu, MenuItems, MenuItem } from "@headlessui/react";
-import FilterDropDownButton from "../FilterDropDownButton/FilterDropDownButton";
-import { Link } from "react-router";
+import { MenuItem } from "@headlessui/react";
+import { ChevronDownIcon } from "lucide-react";
+import PrimaryButton from "~/components/Buttons/PrimaryButton";
+import {
+  MenuDropDown,
+  MenuDropDownButton,
+  MenuDropDownItem,
+  MenuDropDownItems,
+} from "~/components/Menu/Menu";
+import type { Categories } from "~/types/category";
+import type { Cuisines } from "~/types/restaurant";
 
-export default function FilterDropDownMenu({
-  children,
-  categories,
-  onClick,
-}: React.PropsWithChildren<{
+type FilterDropDownMenuProps = {
+  value: string | null;
   categories?: string[];
   onClick: (category: string) => void;
-}>) {
+  isActive?: boolean;
+};
+
+export default function FilterDropDownMenu({
+  value,
+  categories,
+  onClick,
+  isActive = false,
+}: FilterDropDownMenuProps) {
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <FilterDropDownButton>{children}</FilterDropDownButton>
-      <MenuItems
-        transition
-        anchor="bottom end"
-        className="w-52 origin-top-right rounded-xl border border-gray-300 bg-white dark:border-gray-900 dark:bg-gray-900 text-sm/6 dark:text-white transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0"
-      >
-        <div className="flex flex-col">
-          <MenuItem>
-            <button onClick={() => onClick("")}>
-              <div className="font-bold px-4 py-2 dark:data-focus:bg-gray-100 dark:data-focus:text-gray-900 data-focus:bg-gray-200 data-focus:outline-hidden hover:text-gray-500">
-                Все
-              </div>
-            </button>
-          </MenuItem>
-          {categories?.length ? (
-            categories.map((name) => (
-              <MenuItem>
-                <button onClick={() => onClick(name)}>
-                  <div className="font-bold px-4 py-2 dark:data-focus:bg-gray-100 dark:data-focus:text-gray-900 data-focus:bg-gray-200 data-focus:outline-hidden hover:text-gray-500">
-                    {name}
-                  </div>
-                </button>
-              </MenuItem>
-            ))
-          ) : (
-            <div></div>
-          )}
+    <MenuDropDown>
+      <MenuDropDownButton className="rounded-3xl">
+        <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus:border-ring focus:ring-[3px] bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 focus:ring-secondary/75 peer">
+          <p>{value}</p>
+          <ChevronDownIcon
+            aria-hidden="true"
+            className="ml-1 my-0.5 size-5 peer:data-open:rotate-180"
+          />
         </div>
-      </MenuItems>
-    </Menu>
+      </MenuDropDownButton>
+      <MenuDropDownItems>
+        {categories?.length ? (
+          categories.map((category) => (
+            <MenuDropDownItem>
+              <button onClick={() => onClick(category)}>
+                <div className="">{category}</div>
+              </button>
+            </MenuDropDownItem>
+          ))
+        ) : (
+          <div></div>
+        )}
+      </MenuDropDownItems>
+    </MenuDropDown>
   );
 }

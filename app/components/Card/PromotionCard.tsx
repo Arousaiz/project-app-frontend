@@ -1,29 +1,46 @@
 import { BookmarkIcon, StarIcon, TruckIcon } from "@heroicons/react/20/solid";
 import { Link } from "react-router";
-import type { MenuItem, MenuItemPromo } from "~/types/menuItem";
+import type {} from "~/types/menuItem";
+import { Card, CardContent } from "./Card";
+import ImageWithLoadingAndFallback from "./ImageWithFallback";
+import type { Promotions } from "~/types/promotions";
 
 export default function PromotionCard({
-  menuItem,
+  promo,
+  shouldWrapInLink = true,
+  onClick,
 }: {
-  menuItem?: MenuItemPromo;
+  promo?: Promotions;
+  shouldWrapInLink?: boolean;
+  onClick?: () => void;
 }) {
-  return (
-    <Link to={`/restaurant/${menuItem?.restaurant?.id}`}>
-      <div className="min-w-[calc(25%-12px)] flex-[0_0_calc(25%-12px)] group">
-        <div className=" h-64 mx-auto my-4 bg-white dark:bg-gray-900 rounded-lg shadow flex flex-col relative group-hover:-translate-y-2">
-          <img src="/app/assets/orig.jpg" className="rounded-t h-8/12"></img>
-          <p
-            className={`${
-              menuItem?.name ? "text-lg " : "hidden "
-            } text-gray-700 dark:text-white font-bold mx-4 mt-1 line-clamp-1`}
-          >
-            {menuItem?.name ? menuItem.name : "нет названия"}
-          </p>
-          <p className=" text-gray-700 dark:text-white font-light mx-4 mt-1 line-clamp-1">
-            {menuItem?.description ? menuItem.description : "нет описания"}
-          </p>
-        </div>
-      </div>
+  const content = (
+    <Card className="relative group-hover:-translate-y-2">
+      <ImageWithLoadingAndFallback
+        src="/app/assets/placeholder-image.jpg"
+        fallbackSrc="/app/assets/placeholder-image.jpg"
+        alt={`Изображение акции ${promo?.title}`}
+        className="rounded-t-xl w-full h-[160px] object-cover"
+        isInCard={true}
+      ></ImageWithLoadingAndFallback>
+      <CardContent>
+        <p className={`font-bold text-base line-clamp-1`}>
+          {promo?.title ? promo.title : "нет названия"}
+        </p>
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {promo?.description ? promo.description : "нет описания"}
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  return shouldWrapInLink ? (
+    <Link className="group" to={`/restaurant/${promo?.restaurant?.id}`}>
+      {content}
     </Link>
+  ) : (
+    <div className="group" onClick={onClick}>
+      {content}
+    </div>
   );
 }

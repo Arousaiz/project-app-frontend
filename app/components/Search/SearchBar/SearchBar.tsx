@@ -1,33 +1,66 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import SearchResult from "../SearchResult/SearchResult";
-import type { Restaurant } from "~/types/restaurant";
+import type { Restaurants } from "~/types/restaurant";
+import { useState } from "react";
+import { Link } from "react-router";
+import PrimaryButton from "~/components/Buttons/PrimaryButton";
+import Modal from "~/components/Modal/Modal";
+import SearchModal from "~/components/Modals/SearchModal";
+import LoadingSpinner from "~/components/Spinners/LoadingSpinner";
 
 export default function SearchBar({
+  query,
   setQuery,
   results,
   isOpen,
+  isLoading,
 }: {
-  setQuery?: any;
-  results: Restaurant[];
+  query: string;
+  setQuery: (str: string) => void;
+  results?: Restaurants[];
   isOpen: boolean;
+  isLoading: boolean;
 }) {
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
   return (
-    <div className="hidden sm:flex w-full max-w-sm min-w-[200px]">
-      <div className="relative w-full">
+    <div className="w-auto sm:w-full  max-w-sm min-w-0">
+      <div className="lg:hidden p-2">
+        <PrimaryButton
+          variant="ghost"
+          size="icon"
+          className="flex items-center space-x-2 border rounded-lg"
+          onClick={() => setIsMobileSearchOpen(true)}
+        >
+          <MagnifyingGlassIcon className="size-5" />
+        </PrimaryButton>
+      </div>
+      <div className="relative w-full hidden lg:flex">
         <input
-          className="w-full bg-transparent placeholder:text-gray-400  text-gray-600 dark:text-gray-200 text-sm border border-gray-600 rounded-lg pl-3 pr-28 py-2 transition duration-300 ease focus:outline-none focus:border-blue-600 hover:border-blue-300 dark:focus:border-sky-700 dark:hover:border-sky-500 shadow-sm focus:shadow"
-          placeholder="Restaurants..."
+          className="w-full bg-transparent text-sm border border-border rounded-lg pl-3 pr-28 py-2 transition duration-300 ease focus:outline-none focus:border-primary hover:border-ring shadow-sm focus:shadow"
+          placeholder="Рестораны, меню..."
+          value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button
-          className="absolute top-0 end-0 h-full flex items-center rounded-e-lg bg-blue-700 dark:bg-sky-700 p-2.5 border border-blue-700 dark:border-sky-700 text-center text-sm text-gray-200 transition-all shadow-sm hover:shadow focus:bg-blue-800 dark:focus:bg-sky-800 focus:shadow-none active:bg-blue-500 dark:active:bg-sky-600 hover:bg-blue-600 dark:hover:bg-sky-600 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-          type="button"
-        >
-          <MagnifyingGlassIcon className="size-5 mx-auto" />
-          Search
-        </button>
-        <SearchResult results={results} isOpen={isOpen}></SearchResult>
+        <div className="absolute top-0 end-0 h-full flex items-center p-2.5">
+          {isLoading ? (
+            <LoadingSpinner></LoadingSpinner>
+          ) : (
+            <MagnifyingGlassIcon className="size-5 mx-auto" />
+          )}
+        </div>
+        {results !== undefined && (
+          <SearchResult results={results} isOpen={isOpen}></SearchResult>
+        )}
       </div>
+      <SearchModal
+        query={query}
+        results={results}
+        isMobileSearchOpen={isMobileSearchOpen}
+        setIsMobileSearchOpen={setIsMobileSearchOpen}
+        setQuery={setQuery}
+        isLoading={isLoading}
+      ></SearchModal>
     </div>
   );
 }

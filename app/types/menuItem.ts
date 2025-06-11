@@ -1,29 +1,26 @@
-import type { Category } from "./category";
-import type { Restaurant } from "./restaurant";
-import type { Review } from "./review";
+import type { Categories } from "./category";
+import type { Restaurants } from "./restaurant";
+import type { Reviews } from "./review";
 
-export type MenuItem = {
+export type MenuItems = {
   id: string;
+  img_url: string;
   name: string;
   description: string;
   price: number;
-  category: Category;
+  rating: number;
+  isAvailable: boolean;
+  category: Categories;
+  restaurant: Restaurants;
+  reviews: Reviews[];
 };
 
 export type MenuItemInfo = {
   id: string;
   name: string;
   description: string;
+  rating: number;
   price: number;
-  category: Category;
-  reviews: Review[];
-};
-
-export type MenuItemPromo = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: Category;
-  restaurant?: Restaurant;
+  category: Categories;
+  reviews: Reviews[];
 };

@@ -1,29 +1,29 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { Link } from "react-router";
-import type { Restaurant } from "~/types/restaurant";
+import type { Restaurants } from "~/types/restaurant";
 
 export default function SearchResult({
   results,
   isOpen,
 }: {
-  results: Restaurant[];
+  results: Restaurants[];
   isOpen: boolean;
 }) {
   return (
-    <div>
+    <>
       {isOpen && results.length > 0 && (
-        <div className="absolute flex flex-col left-0 right-0 mt-1 bg-gray-600/50 border border-gray-600 rounded shadow-lg z-10 max-h-60 overflow-auto">
+        <div className="absolute left-0 right-0 top-full mt-2 min-w-96 hidden sm:flex flex-col bg-popover/90 backdrop-blur-md border border-border rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto animate-fade-in transition-all duration-150">
           {results.map((item) => (
             <Link
               to={`/restaurant/${item.id}`}
               key={item.id}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-500 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent/60 transition-colors truncate"
             >
-              {item.name}
+              <span className="truncate">{item.name}</span>
             </Link>
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }

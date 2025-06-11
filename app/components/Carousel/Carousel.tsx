@@ -21,20 +21,24 @@ export default function Carousel({
   } = usePrevNextButtons(emblaApi);
 
   return (
-    <div className="relative z-10">
+    <div className="relative z-10 embla">
       <div
-        className={`overflow-hidden m-auto select-none ` + { className }}
+        className={`embla__viewport select-none ${className}`}
         ref={emblaRef}
       >
-        <div className="flex gap-x-4 max-w-full justify-center">
+        <div className="embla__container">
           {Children.map(children, (child: any) => {
-            return child && child.props.name
-              ? createElement(child.type, {
-                  ...{
-                    ...child.props,
-                  },
-                })
-              : child;
+            if (!child) return null;
+
+            return (
+              <div className="embla__slide" key={child.key || undefined}>
+                {child.props.name
+                  ? createElement(child.type, {
+                      ...child.props,
+                    })
+                  : child}
+              </div>
+            );
           })}
         </div>
         {!prevBtnDisabled && (

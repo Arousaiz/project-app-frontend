@@ -1,40 +1,40 @@
-import { BookmarkIcon, PlusIcon } from "@heroicons/react/20/solid";
+import { PlusIcon } from "@heroicons/react/20/solid";
 import { StarIcon } from "@heroicons/react/20/solid";
-import { useEffect, useState } from "react";
 import { useCart } from "~/providers/cartContext";
-import type { MenuItem, MenuItemInfo } from "~/types/menuItem";
+import type { MenuItemInfo } from "~/types/menuItem";
 import CounterButton from "../Buttons/CounterButton";
 import { useFavorites } from "~/providers/favoritesContext";
-import { useFetcher, useParams, useRevalidator } from "react-router";
+import { useFetcher, useParams } from "react-router";
+import { Card, CardContent } from "./Card";
+import ImageWithLoadingAndFallback from "./ImageWithFallback";
+import { Bookmark } from "lucide-react";
+import PrimaryButton from "../Buttons/PrimaryButton";
+import { useConfirmAddToCart } from "~/utils/cart";
+import ConfirmDialog from "../Dialogs/ConfirmDialog";
 
 export default function ProductCard({
   menuItem,
+  restaurantId,
   openReview,
+  onClick,
 }: {
   menuItem: MenuItemInfo;
+  restaurantId: string;
   openReview: () => void;
+  onClick?: () => void;
 }) {
   const {
     cart,
-    addToCart,
     removeFromCart,
-    clearCart,
     increaseQuantity,
     decreaseQuantity,
     isItemInCart,
   } = useCart();
-  const [isInCart, setIsInCart] = useState(false);
+  const { requestAddToCart, isConfirmOpen, confirmAdd, cancelAdd } =
+    useConfirmAddToCart();
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
-  const [favorite, setFavorite] = useState(false);
   const fetcher = useFetcher();
-  const revalidator = useRevalidator();
   const { id } = useParams();
-
-  useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data) {
-      revalidator.revalidate(); // перезапускаем loader
-    }
-  }, [fetcher.state, fetcher.data]);
 
   const toggleFavorite = (isFavorite: boolean) => {
     fetcher.submit(
@@ -46,82 +46,104 @@ export default function ProductCard({
       {
         method: "post",
         encType: "application/json",
-        action: "/action/favorites",
       }
     );
-    favorite ? removeFromFavorites(menuItem.id) : addToFavorites(menuItem.id);
+    isFavorite ? removeFromFavorites(menuItem.id) : addToFavorites(menuItem.id);
   };
 
-  useEffect(() => {
-    setFavorite(isFavorite(menuItem.id));
-  }, [menuItem.id, isFavorite]);
+  const isInCart = isItemInCart(menuItem.id);
+  const isInFavorites = isFavorite(menuItem.id);
+  const count = cart.items[menuItem.id]?.count ?? 0;
 
-  useEffect(() => {
-    if (isItemInCart(menuItem.id)) {
-      setIsInCart(true);
-    } else {
-      setIsInCart(false);
-    }
-  }, [cart]);
+  const handleAddToCart = () => {
+    requestAddToCart(menuItem, restaurantId);
+  };
+
   return (
-    <div className="w-72 h-84 mx-auto my-4 bg-white dark:bg-gray-900 rounded-lg shadow flex flex-col relative hover:-translate-y-2">
-      <div className="relative h-7/12">
-        <img
-          src="/app/assets/pizza.jpg"
-          className="rounded-t h-full w-full"
-        ></img>
-        <button
+    <Card
+      className="w-full h-full  mx-auto relative hover:-translate-y-2"
+      onClick={onClick}
+    >
+      <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+        <ImageWithLoadingAndFallback
+          src="/app/assets/placeholder-image.jpg"
+          fallbackSrc="/app/assets/placeholder-image.jpg"
+          alt={`Изображение ресторана ${menuItem?.name}`}
+          className="w-full h-full object-cover"
+          isInCard={true}
+        ></ImageWithLoadingAndFallback>
+        <PrimaryButton
+          variant="secondary"
+          size="icon"
           type="button"
-          onClick={() => {
-            toggleFavorite(favorite);
-            setFavorite(!favorite);
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(isInFavorites);
           }}
-          className={`absolute items-center mt-2 mr-2 text-white rounded-full top-0 right-0 ${
-            favorite
-              ? "bg-red-600 hover:bg-red-700"
-              : "bg-blue-600 hover:bg-blue-800"
-          }`}
+          className={`absolute top-2 right-2`}
         >
-          <BookmarkIcon className="size-8 p-1" />
-        </button>
-        <div className="flex flex-row mx-4 absolute bottom-2 bg-blue-600 dark:bg-sky-800 rounded-lg p-1 hover:bg-blue-800 dark:hover:bg-sky-700">
-          <button className="flex" onClick={openReview}>
-            <p className=" text-white dark:text-white font-bold select-none">
-              Rate
-            </p>
-            <StarIcon className="text-white size-4 mt-1 ml-1"></StarIcon>
-          </button>
-        </div>
+          <Bookmark
+            className={`size-8 p-1 ${
+              isInFavorites ? "bg-secondary-foreground " : " "
+            }`}
+          />
+        </PrimaryButton>
+        {menuItem.rating && (
+          <PrimaryButton
+            variant="secondary"
+            className="absolute bottom-2 left-2 bg-green-300 text-black hover:bg-green-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              openReview();
+            }}
+          >
+            <div className="flex">
+              <p className="font-bold select-none">{menuItem.rating}</p>
+              <StarIcon className="size-4"></StarIcon>
+            </div>
+          </PrimaryButton>
+        )}
       </div>
-      <p className=" text-gray-700 dark:text-white font-bold mx-4 mt-1 line-clamp-1">
-        {menuItem.name}
-      </p>
-      <div className="flex mx-4 justify-between h-12 w-11/12 ">
-        <p className=" text-gray-700 dark:text-gray-300 line-clamp-2 ">
-          {menuItem.description}
-        </p>
-      </div>
-      <p className=" text-gray-700 dark:text-white font-bold absolute bottom-0 left-0 mb-4 ml-4">
-        {menuItem.price + "p"}
-      </p>
-      {isInCart ? (
-        <div className="absolute items-center bottom-0 right-0 mb-4 mr-4">
-          <CounterButton
-            count={cart.find((i) => i.id === menuItem.id)?.count!}
-            minusClick={() => decreaseQuantity(menuItem.id)}
-            plusClick={() => increaseQuantity(menuItem.id)}
-            deleteFromCart={() => removeFromCart(menuItem.id)}
-          ></CounterButton>
+      <CardContent className="flex flex-col justify-between gap-2 p-3 min-h-[9rem]">
+        <div>
+          <p className="font-bold text-base line-clamp-1 break-words">
+            {menuItem.name}
+          </p>
+          <p className="text-sm text-muted-foreground line-clamp-2 break-words mt-1">
+            {menuItem.description}
+          </p>
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => addToCart(menuItem)}
-          className="absolute items-center bottom-0 right-0 mb-4 mr-4 text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-full dark:bg-sky-800 dark:hover:bg-sky-700 dark:focus:ring-sky-800"
-        >
-          <PlusIcon className="size-8 p-1"></PlusIcon>
-        </button>
-      )}
-    </div>
+        <div className="flex justify-between items-center pt-2">
+          <p className="font-bold">{menuItem.price}p</p>
+          {isInCart ? (
+            <CounterButton
+              count={count}
+              minusClick={() => decreaseQuantity(menuItem.id)}
+              plusClick={() => increaseQuantity(menuItem.id)}
+              deleteFromCart={() => removeFromCart(menuItem.id)}
+            />
+          ) : (
+            <PrimaryButton
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart();
+              }}
+            >
+              <PlusIcon className="size-8 p-1" />
+            </PrimaryButton>
+          )}
+        </div>
+      </CardContent>
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title={"Блюдо из другого ресторана"}
+        message={
+          "Хотите сбросить текущее содержимое корзины и добавить данное блюдо в корозину?"
+        }
+        onCancel={cancelAdd}
+        onConfirm={confirmAdd}
+      ></ConfirmDialog>
+    </Card>
   );
 }

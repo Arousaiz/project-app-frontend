@@ -1,22 +1,17 @@
-import { UserIcon } from "@heroicons/react/20/solid";
-import { Link, useLoaderData } from "react-router";
-import PrimaryButton from "~/components/Buttons/PrimaryButton";
+import { useLoaderData } from "react-router";
 import OrderCard from "~/components/Card/OrderCard";
-import ReviewCard from "~/components/Card/ReviewCard";
-import CredentialsForm from "~/components/Forms/CredentialsForm";
-import ProfileForm from "~/components/Forms/ProfileForm";
 import ProfileHeader from "~/components/Profile/ProfileHeader";
 import type { Route } from "../../+types/root";
-import { fetchUser } from "~/services/session.server";
 import ProfileContent from "~/components/Profile/ProfileContent";
+import { ProfileService } from "~/api/api.profile";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const user = await fetchUser(request);
+export async function clientLoader({ request }: Route.LoaderArgs) {
+  const user = await ProfileService.fetchProfile();
   return { user };
 }
 
 export default function ProfileOrders() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof clientLoader>();
   return (
     <div className="flex flex-col max-w-7xl mx-auto min-h-[70dvh] mt-10">
       <ProfileHeader username={user?.username}></ProfileHeader>

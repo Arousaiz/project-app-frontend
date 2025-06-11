@@ -19,9 +19,9 @@ export default function CartItem({
     <div className="grid grid-cols-3 ">
       <div>
         <p>{name}</p>
-        <p className="text-gray-600">Additional info</p>
+        {/* <p className="">Additional info</p> */}
       </div>
-      <p className="text-center">{price}</p>
+      <p className="text-center">{price}p</p>
       <div className="items-center">
         <CounterButton
           count={count}
