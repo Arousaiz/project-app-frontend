@@ -36,7 +36,7 @@ export type CartMenuItem = {
 
 type CartItemsMap = Record<string, CartMenuItem>;
 
-type CartState = {
+export type CartState = {
   restaurantId: string | null;
   items: CartItemsMap;
 };
@@ -130,10 +130,7 @@ function cartReducer(state: CartState, action: Action): CartState {
 }
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(cartReducer, {
-    restaurantId: null,
-    items: {},
-  });
+  const [state, dispatch] = useReducer(cartReducer, loadCartFromStorage());
 
   useEffect(() => {
     sessionStorage.setItem("cart", JSON.stringify(state));

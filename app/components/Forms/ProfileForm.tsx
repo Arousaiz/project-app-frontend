@@ -1,16 +1,14 @@
 import {
   type RegisterOptions,
   type FieldValues,
-  type UseFormRegisterReturn,
   useForm,
 } from "react-hook-form";
-import Form from "./Form";
-import Input from "./Input";
-import Label from "./Label";
-import { useNavigate, useSubmit } from "react-router";
-import InputWithIcon from "./InputWithIcon";
+import Form from "../ui/Forms/Form";
+import Input from "../ui/Forms/Input";
+import Label from "../ui/Forms/Label";
+import { useFetcher, useNavigate, useSubmit } from "react-router";
 import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/20/solid";
-import SubmitButton from "./SubmitButton";
+import SubmitButton from "../ui/Forms/SubmitButton";
 import { profileSchema } from "~/zodScheme/profileSchema";
 import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,78 +35,74 @@ export default function ProfileForm({
       contactNumber: person?.contactNumber,
     },
   });
-  const submit = useSubmit();
-  const navigate = useNavigate();
+  const fetcher = useFetcher();
 
-  // usefetcher mb!!!
   const onSubmit = (data: FieldValues) => {
-    submit(data, {
+    fetcher.submit(data, {
       encType: "application/json",
       method: "POST",
-      action: "/action/update-info",
     });
-    setTimeout(() => navigate(0), 200);
   };
 
   return (
     <div>
-      <Form onSubmit={handleSubmit(onSubmit)} className={""}>
+      <fetcher.Form onSubmit={handleSubmit(onSubmit)} className={""}>
         <div className="flex justify-between w-full my-2">
           <div className="flex flex-col w-full sm:w-6/12">
             <Label htmlFor="firstName">Имя</Label>
             <Input
-              register={register}
+              {...register("firstName")}
               name={"firstName"}
               type={"firstName"}
               id={"firstName"}
               placeholder="Alexandro"
+              error={errors.firstName?.message}
             ></Input>
           </div>
           <div className="flex flex-col w-5/12">
             <Label htmlFor="lastName">Фамилия</Label>
             <Input
-              register={register}
+              {...register("lastName")}
               name={"lastName"}
               type={"lastName"}
               id={"lastName"}
               placeholder="Rodrigez"
+              error={errors.lastName?.message}
             ></Input>
           </div>
         </div>
         <div>
           <Label htmlFor="email">Почта</Label>
           <div className="my-2">
-            <InputWithIcon
-              register={register}
+            <Input
+              {...register("email")}
               name="email"
               id="email"
               type="email"
               placeholder="example@gmail.com"
-              errorField={errors.email}
-            >
-              <EnvelopeIcon className="size-5 "></EnvelopeIcon>
-            </InputWithIcon>
+              error={errors.email?.message}
+              icon={<EnvelopeIcon className="size-5 "></EnvelopeIcon>}
+            ></Input>
           </div>
         </div>
         <div>
           <Label htmlFor="contactNumber">Телефон</Label>
           <div className="my-2">
-            <InputWithIcon
-              register={register}
+            <Input
+              {...register("contactNumber")}
               name="contactNumber"
               id="contactNumber"
               type="contactNumber"
               placeholder="+375-11-33-11-369"
-              errorField={errors.contactNumber}
-            >
-              <PhoneIcon className="size-5"></PhoneIcon>
-            </InputWithIcon>
+              error={errors.contactNumber?.message}
+              icon={<PhoneIcon className="size-5"></PhoneIcon>}
+            ></Input>
           </div>
         </div>
         <div className="mt-4 w-6/12 justify-self-center">
           <SubmitButton>Отправить</SubmitButton>
         </div>
-      </Form>
+      </fetcher.Form>
     </div>
   );
 }

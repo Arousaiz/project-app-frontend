@@ -1,5 +1,5 @@
 import { UserIcon } from "@heroicons/react/20/solid";
-import SimpleLink from "../Footer/SimpleLink";
+import { PrimaryLink } from "../ui/Links/PrimaryLink";
 
 export default function ProfileHeader({
   username,
@@ -17,7 +17,7 @@ export default function ProfileHeader({
           <div className="bg-primary text-primary-foreground font-bold rounded-lg flex w-fit items-center justify-center p-4 mt-2">
             {bonusPoints} очков
           </div>
-          <SimpleLink to="/bonus-shop">Магазин бонусов</SimpleLink>
+          <PrimaryLink to="/bonus-shop">Магазин бонусов</PrimaryLink>
         </div>
       </div>
     </div>

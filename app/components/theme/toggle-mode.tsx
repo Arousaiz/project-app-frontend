@@ -1,14 +1,15 @@
 import { Moon, Sun } from "lucide-react";
 
-import { useTheme } from "./theme-provider";
+import { useTheme } from "../../providers/theme-provider";
 import { useEffect } from "react";
-import PrimaryButton from "../Buttons/PrimaryButton";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const root = document.documentElement;
+    root.classList.add("transition-all");
     if (theme === "dark") {
       root.classList.remove("animate-fade-out");
       root.classList.add("animate-fade-in");
@@ -18,7 +19,11 @@ export function ModeToggle() {
     }
 
     const timer = setTimeout(() => {
-      root.classList.remove("animate-fade-in", "animate-fade-out");
+      root.classList.remove(
+        "animate-fade-in",
+        "animate-fade-out",
+        "transition-all"
+      );
     }, 800);
 
     return () => clearTimeout(timer);

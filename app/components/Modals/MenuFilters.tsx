@@ -1,15 +1,6 @@
-import type { Restaurants } from "~/types/restaurant";
-import Modal from "../Modal/Modal";
-import {
-  ComputerDesktopIcon,
-  CreditCardIcon,
-  WalletIcon,
-} from "@heroicons/react/20/solid";
-import { useQuery } from "@tanstack/react-query";
-import { RestaurantService } from "~/api/api.restaurant";
+import Modal from "../ui/Modal";
 import { useState } from "react";
-import { RadioGroup } from "../Buttons/Radio";
-import { CheckBoxGroup } from "../Buttons/Checkbox";
+import { RadioGroup } from "../ui/Buttons/Radio";
 
 const options = [
   { value: "Рейтинг", label: "Рейтинг" },

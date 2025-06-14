@@ -1,38 +1,38 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Cart from "~/components/Card/CartCard";
 import ProductCard from "~/components/Card/ProductCard";
 import PromotionCard from "~/components/Card/PromotionCard";
 import RestaurantHeaderCard from "~/components/Card/RestaurantHeaderCard";
-import Carousel from "~/components/Carousel/Carousel";
-import FilterDropDownMenu from "~/components/Filters/FilterDropDownMenu/FilterDropDownMenu";
+import Carousel from "~/components/ui/Carousel/Carousel";
+import FilterDropDownMenu from "~/components/Menus/FilterDropDownMenu";
 import type { Route } from "../+types/root";
 import { RestaurantService } from "~/api/api.restaurant";
-import { useLoaderData, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import type { MenuItems } from "~/types/menuItem";
 import ReviewModal from "~/components/Modals/ReviewModal";
-import { FavoritesService } from "~/api/api.favorites";
-import { FavoritesProvider } from "~/providers/favoritesContext";
-import PrimaryButton from "~/components/Buttons/PrimaryButton";
+import PrimaryButton from "~/components/ui/Buttons/PrimaryButton";
 import type { Promotions } from "~/types/promotions";
-import { ArrowLeftIcon, Filter } from "lucide-react";
-import { useCategoryIntersectionObserver } from "~/utils/category";
-import { useOverflowCategories } from "~/utils/measure";
-import { cn } from "~/utils/utils";
+import { ArrowLeftIcon, Settings2 } from "lucide-react";
+import { useCategoryIntersectionObserver } from "~/hooks/use-category";
 import MenuFilters from "~/components/Modals/MenuFilters";
 import PromotionModal from "~/components/Modals/PromotionModal";
 import ProductModal from "~/components/Modals/MenuItemInfo";
-import CartSummaryBar from "~/components/Card/CartSummaryBar";
-import CartModal from "~/components/Modals/CartModal";
-import SimpleLink from "~/components/Footer/SimpleLink";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { ApiData, ApiDataOne } from "~/utils/query-utils";
+import type { AxiosError } from "axios";
+import { SkeletonCard } from "~/components/ui/Skeletons/skeletonCard";
+import { SkeletonButton } from "~/components/ui/Skeletons/skeletonButton";
+import { useOverflowButtons } from "~/hooks/use-oveflow";
+import { PrimaryLink } from "~/components/ui/Links/PrimaryLink";
 
 export async function clientLoader({ request, params }: Route.LoaderArgs) {
-  if (params.id) {
-    const menuItems = await RestaurantService.fetchMenuItems(params.id);
-    const promotions = await RestaurantService.fetchPromotionsById(params.id);
-    return { menuItems, promotions };
-  } else {
-    throw Error("Not Found");
-  }
+  // if (params.id) {
+  //   const menuItems = await RestaurantService.fetchMenuItems(params.id);
+  //   const promotions = await RestaurantService.fetchPromotionsById(params.id);
+  //   return { menuItems, promotions };
+  // } else {
+  //   throw Error("Not Found");
+  // }
 }
 
 export async function clientAction({ request }: Route.ActionArgs) {
@@ -42,27 +42,37 @@ export async function clientAction({ request }: Route.ActionArgs) {
     _intent: string;
   } = await request.json();
 
-  if (res._intent === "add") {
-    await FavoritesService.createFavorite({
-      menuItemId: res.menuItemId,
-      restaurantId: res.restaurantId,
-    });
-  } else if (res._intent === "remove") {
-    await FavoritesService.deleteFavorite(res.menuItemId);
-  }
-
   return { success: true };
 }
 
 export default function RestaurantPage() {
-  const { menuItems, promotions } = useLoaderData<typeof clientLoader>();
   const params = useParams();
   const restaurantId = params.id;
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [selectedPromo, setSelectedPromo] = useState<Promotions | null>(null);
   const [selectedItem, setSelectedItem] = useState<MenuItems | null>(null);
+  const location = useLocation();
+  const menuContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const highlightId = params.get("highlight");
+    if (highlightId) {
+      const el = document.getElementById(`menu-item-${highlightId}`);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 100;
+        window.scrollTo({ behavior: "smooth", top: y });
+
+        el.classList.add("highlight");
+        const timeoutId = setTimeout(() => {
+          el.classList.remove("highlight");
+        }, 3000);
+
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [location.search]);
 
   const [openReview, setOpenReview] = useState<{
     id: string | null;
@@ -71,12 +81,6 @@ export default function RestaurantPage() {
     id: null,
     isOpen: false,
   });
-
-  const [open, setOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
-  const { visibleCategories, overflowCategories } =
-    useOverflowCategories(containerRef);
 
   useCategoryIntersectionObserver({
     refs: categoryRefs,
@@ -89,121 +93,165 @@ export default function RestaurantPage() {
 
   const scrollToCategory = (categoryName: string) => {
     setActiveCategory(categoryName);
-    categoryRefs.current[categoryName]?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+
+    const el = categoryRefs.current[categoryName];
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.pageYOffset - 50;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
   };
 
   const closeModal = () => {
     setOpenReview({ id: null, isOpen: false });
   };
 
+  const { data: promotions, isLoading: isLoadingPromotions } = useQuery<
+    ApiData<Promotions>,
+    AxiosError,
+    Promotions[]
+  >({
+    queryKey: ["restaurantPromotions", restaurantId],
+    queryFn: () => RestaurantService.fetchPromotionsById(restaurantId!),
+    select: (res) => res.data,
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
+  });
+
+  const {
+    data: menu,
+    isLoading: isLoadingMenu,
+    isFetching,
+    error,
+  } = useQuery<
+    ApiDataOne<Record<string, MenuItems[]>>,
+    AxiosError,
+    Record<string, MenuItems[]>
+  >({
+    queryKey: ["restaurants", restaurantId],
+    queryFn: () => RestaurantService.fetchMenuItems(restaurantId!),
+    select: (res) => res.data,
+    placeholderData: keepPreviousData,
+  });
+
+  const categories = Object.keys(menu ?? {}).map((key) => ({ id: key }));
+
+  const { containerRef, hiddenItems } = useOverflowButtons({
+    items: categories,
+  });
+
+  const overflowCategories = Object.keys(menu ?? {}).filter(
+    (key) => hiddenItems[key]
+  );
+
   return (
-    <FavoritesProvider>
+    <div>
       <div className="flex flex-col max-w-7xl mx-auto min-h-[2000px] mt-5 p-2 sm:p-4">
         <div className="flex items-center gap-2 py-2">
-          <SimpleLink to="/" className="flex items-center font-bold p-4 ">
+          <PrimaryLink to="/" className="font-bold p-4">
             <ArrowLeftIcon className="w-4 h-4" />К остальным ресторанам
-          </SimpleLink>
+          </PrimaryLink>
         </div>
         <div>
           <RestaurantHeaderCard id={params.id!}></RestaurantHeaderCard>
         </div>
-        <div className={`${promotions?.data?.length ? " " : "hidden "}  m-4`}>
+        <div
+          className={`${
+            isLoadingPromotions || promotions?.length ? "block" : "hidden"
+          } p-4`}
+        >
           <h2 className="font-bold text-4xl">Акции</h2>
-          <div
-            className={`${
-              promotions?.data?.length ? "flex" : "hidden"
-            } min-w-0 gap-4 justify-center`}
-          >
-            <div className="w-full">
-              <Carousel className="">
-                {promotions?.data.length ? (
-                  promotions?.data.map((item) => (
-                    <PromotionCard
-                      shouldWrapInLink={false}
-                      promo={item}
-                      onClick={() => setSelectedPromo(item)}
-                    ></PromotionCard>
-                  ))
-                ) : (
-                  <div></div>
-                )}
-              </Carousel>
-            </div>
+          <div className="w-full p-4">
+            <Carousel className="">
+              {isLoadingPromotions
+                ? Array.from({ length: 2 }).map((_, i) => <SkeletonCard />)
+                : promotions?.length &&
+                  promotions.map((item) => (
+                    <PromotionCard key={item.id} promo={item} />
+                  ))}
+            </Carousel>
           </div>
         </div>
         <div className="flex">
-          <div className="flex-1 flex-col min-h-screen  ">
+          <div className="flex-1 flex-col min-h-screen">
             <div
               ref={containerRef}
               className="flex p-4 overflow-x-auto md:overflow-clip sticky top-0 z-[1000] bg-background border-b space-x-2 hide-scrollbar"
             >
-              {Object.keys(menuItems.data).map((category) => {
-                const isOverflowed = overflowCategories.includes(category);
-                return (
-                  <PrimaryButton
-                    data-category={category}
-                    key={category}
-                    onClick={() => scrollToCategory(category)}
-                    variant={activeCategory === category ? "primary" : "ghost"}
-                    className={cn(
-                      "shrink-0 category-button",
-                      isOverflowed && "invisible absolute -z-10"
-                    )}
-                  >
-                    <p className="text-center">{category}</p>
-                  </PrimaryButton>
-                );
-              })}
-              {overflowCategories.length !== 0 && (
+              {isLoadingMenu
+                ? Array.from({ length: 5 }).map((_, i) => <SkeletonButton />)
+                : Object.entries(menu ?? {}).map(([category, _]) => {
+                    if (hiddenItems[category]) return null;
+                    return (
+                      <PrimaryButton
+                        data-category={category}
+                        key={category}
+                        onClick={() => scrollToCategory(category)}
+                        variant={
+                          activeCategory === category ? "primary" : "ghost"
+                        }
+                      >
+                        <p className="text-center">{category}</p>
+                      </PrimaryButton>
+                    );
+                  })}
+              {!isLoadingMenu && (
                 <FilterDropDownMenu
+                  data-element="dropdown"
                   onClick={(category: string) => scrollToCategory(category)}
                   categories={overflowCategories}
-                  value={activeCategory || "Остальное"}
-                ></FilterDropDownMenu>
+                  hidden={
+                    Object.keys(menu ?? {}).filter((key) => hiddenItems[key])
+                      .length === 0
+                  }
+                />
               )}
-              <PrimaryButton
-                className="filter-button"
-                variant="secondary"
-                onClick={() => setOpen(true)}
-              >
-                Фильтры
-                <Filter className="size-4"></Filter>
-              </PrimaryButton>
             </div>
-            <div className="flex flex-col p-4">
-              {menuItems.data !== undefined &&
-                Object.entries(menuItems.data).map(([category, items]) => (
+            <div className="flex flex-col p-4" ref={menuContainerRef}>
+              {isLoadingMenu ? (
+                <div>
+                  <div className="h-6 w-40 rounded bg-gray-300 animate-pulse mb-4"></div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <SkeletonCard />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                menu !== undefined &&
+                Object.entries(menu).map(([category, items]) => (
                   <div
                     key={category}
                     ref={(el: HTMLDivElement | null) => {
                       categoryRefs.current[category] = el;
                     }}
-                    className=""
                     data-category={category}
                   >
                     <h3 className="pt-6 pb-2">{category}</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {items.map((item) => (
-                        <ProductCard
-                          key={item.id}
-                          openReview={() => openModal(item.id)}
-                          menuItem={item}
-                          onClick={() => setSelectedItem(item)}
-                          restaurantId={restaurantId!}
-                        ></ProductCard>
-                      ))}
+                      {items.map((item) => {
+                        const promo = promotions?.find(
+                          (p) => p.menuItem.id === item.id
+                        );
+
+                        return (
+                          <ProductCard
+                            id={`menu-item-${item.id}`}
+                            promotion={promo}
+                            key={item.id}
+                            openReview={() => openModal(item.id)}
+                            menuItem={item}
+                            onClick={() => setSelectedItem(item)}
+                            restaurantId={restaurantId!}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
+                ))
+              )}
             </div>
           </div>
           <Cart></Cart>
-
-          <CartSummaryBar onClick={() => setIsCartOpen(true)} />
-          <CartModal open={isCartOpen} onClose={() => setIsCartOpen(false)} />
         </div>
         <div className="min-h-screen"></div>
       </div>
@@ -222,18 +270,6 @@ export default function RestaurantPage() {
           onClose={() => setSelectedPromo(null)}
         ></PromotionModal>
       )}
-
-      <MenuFilters
-        open={open}
-        onClose={() => setOpen(false)}
-        id={""}
-      ></MenuFilters>
-
-      <ReviewModal
-        open={openReview.isOpen}
-        onClose={() => closeModal()}
-        id={openReview.id!}
-      ></ReviewModal>
-    </FavoritesProvider>
+    </div>
   );
 }

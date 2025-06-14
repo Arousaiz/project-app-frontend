@@ -1,13 +1,11 @@
 import { authSchema } from "~/zodScheme/authSchema";
-import { useForm, type FieldValues } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { useSubmit } from "react-router";
-import HelpLink from "../HelpLink";
-import SubmitButton from "../SubmitButton";
-import Label from "../Label";
-import Input from "../Input";
-import Form from "../Form";
+import SubmitButton from "../../ui/Forms/SubmitButton";
+import Label from "../../ui/Forms/Label";
+import Input from "../../ui/Forms/Input";
+import Form from "../../ui/Forms/Form";
 
 const formScheme = authSchema.pick({ email: true });
 

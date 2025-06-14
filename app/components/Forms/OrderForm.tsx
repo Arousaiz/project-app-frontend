@@ -1,44 +1,69 @@
 import {
   type RegisterOptions,
   type FieldValues,
-  type UseFormRegisterReturn,
   useForm,
+  Controller,
 } from "react-hook-form";
-import Form from "./Form";
-import Input from "./Input";
-import Label from "./Label";
+import Form from "../ui/Forms/Form";
+import Input from "../ui/Forms/Input";
+import Label from "../ui/Forms/Label";
 import { useNavigate, useSubmit } from "react-router";
-import InputWithIcon from "./InputWithIcon";
-import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/20/solid";
-import SubmitButton from "./SubmitButton";
-import { addressSchema } from "~/zodScheme/profileSchema";
+import { ComputerDesktopIcon } from "@heroicons/react/20/solid";
+import SubmitButton from "../ui/Forms/SubmitButton";
 import type { Addresses } from "~/types/address";
 import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Select from "./Select";
 import { OrderSchema } from "~/zodScheme/orderSchema";
 import {
   PaymentMethod,
   type CreateOrder,
   type CreateOrderItem,
 } from "~/types/order";
-import { useCart, type CartMenuItem } from "~/providers/cartContext";
+import { useCart, type CartState } from "~/providers/cartContext";
+import TextArea from "../ui/Forms/TextArea";
+import { RadioGroup } from "../ui/Buttons/Radio";
+import { CreditCardIcon, Wallet } from "lucide-react";
+import { useState } from "react";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
+import { useMutation } from "@tanstack/react-query";
+import { OrderService } from "~/api/api.order";
+import { toast } from "sonner";
+
+const paymentOptions = [
+  {
+    value: PaymentMethod.CASH,
+    label: "Наличными",
+    icon: <Wallet className="w-5 h-5 mr-1" />,
+  },
+  {
+    value: PaymentMethod.CARD,
+    label: "Картой при получении",
+    icon: <CreditCardIcon className="w-5 h-5 mr-1" />,
+  },
+  {
+    value: PaymentMethod.ONLINE,
+    label: "Онлайн",
+    icon: <ComputerDesktopIcon className="w-5 h-5 mr-1" />,
+  },
+];
 
 const formSchema = OrderSchema;
 
 export default function OrderForm({
   address,
   userId,
-  restaurantId,
+  totalPrice,
 }: {
   address?: Addresses | null;
-  restaurantId: string;
   userId: string;
+  totalPrice: number;
 }) {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    control,
+    watch,
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,92 +72,159 @@ export default function OrderForm({
         street: address?.street,
         house: address?.house,
       },
+      comment: "",
       paymentMethod: PaymentMethod.CASH,
       deliveryTime: new Date(),
     },
   });
-  const cart = useCart();
+  const { cart, clearCart } = useCart();
   const submit = useSubmit();
   const navigate = useNavigate();
 
-  // usefetcher mb!!!
+  const createOrderMutation = useMutation({
+    mutationFn: (orderData: CreateOrder) => OrderService.createOrder(orderData),
+    onSuccess: () => {
+      navigate("/order/success");
+    },
+    onError: (error: any) => {
+      toast.error("Ошибка при создании заказа");
+      console.error("Ошибка при создании заказа:", error);
+    },
+  });
+
   const onSubmit = (data: FieldValues) => {
-    console.log(data.PaymentMethod);
     const toOrder = createOrderFromCart(
-      cart.cart,
+      cart,
       userId,
-      restaurantId,
       data as {
         address: Addresses;
         paymentMethod: PaymentMethod;
         deliveryTime: Date;
+        comment: string;
       }
     );
-    submit(JSON.stringify(toOrder), {
-      encType: "application/json",
-      method: "POST",
-      action: "",
-    });
+    createOrderMutation.mutate(toOrder);
   };
+
+  const [manual, setManual] = useState(false);
 
   return (
     <div>
       <Form onSubmit={handleSubmit(onSubmit)} className={""}>
-        <div className="flex flex-col justify-between items-center w-full my-2">
-          <div className="w-full sm:w-6/12">
+        <div className="flex flex-col justify-between items-center w-full space-y-2">
+          <div className="w-full lg:w-8/12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 max-w-3xl mx-auto">
+              <div>
+                <Label htmlFor="address.city">Город</Label>
+                <Input
+                  {...register("address.city")}
+                  name={"address.city"}
+                  type={"text"}
+                  id={"address.city"}
+                  placeholder="Гродно"
+                  error={errors.address?.city?.message}
+                />
+              </div>
+              <div>
+                <Label htmlFor="address.street">Улица</Label>
+                <Input
+                  {...register("address.street")}
+                  name={"address.street"}
+                  type={"text"}
+                  id={"address.street"}
+                  placeholder="ул. Социалистическая"
+                  error={errors.address?.street?.message}
+                />
+              </div>
+              <div>
+                <Label htmlFor="address.house">Дом</Label>
+                <Input
+                  {...register("address.house")}
+                  name={"address.house"}
+                  type={"text"}
+                  id={"address.house"}
+                  placeholder="12"
+                  error={errors.address?.house?.message}
+                />
+              </div>
+            </div>
             <div>
-              <Label htmlFor="address.city">Город</Label>
-              <Input
-                register={register}
-                name={"address.city"}
-                type={"text"}
-                id={"address.city"}
-                placeholder="Гродно"
-              ></Input>
-            </div>
-            <div className="my-2">
-              <Label htmlFor="address.street">Улица</Label>
-              <Input
-                register={register}
-                name={"address.street"}
-                type={"text"}
-                id={"address.street"}
-                placeholder="ул. Социалистическая"
-              ></Input>
-            </div>
-            <div className="my-2">
-              <Label htmlFor="address.house">Дом</Label>
-              <Input
-                register={register}
-                name={"address.house"}
-                type={"text"}
-                id={"address.house"}
-                placeholder="12"
-              ></Input>
+              <Label htmlFor="paymentMethod">Способ оплаты</Label>
+              <Controller
+                name="paymentMethod"
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup
+                    name="paymentMethod"
+                    options={paymentOptions.map(({ label, value }) => ({
+                      label: (
+                        <div className="flex items-center">
+                          {
+                            paymentOptions.find((opt) => opt.value === value)
+                              ?.icon
+                          }
+                          {label}
+                        </div>
+                      ),
+                      value,
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </div>
             <div>
-              <Label htmlFor="paymentMethod">Дом</Label>
-              <Select name="paymentMethod" register={register}>
-                <option value={PaymentMethod.CASH}>Наличными</option>
-                <option value={PaymentMethod.CARD}>Картой при получении</option>
-                <option value={PaymentMethod.ONLINE}>Онлайн</option>
-              </Select>
+              <Label htmlFor="comment">Комментарий к заказу</Label>
+              <TextArea
+                {...register("comment")}
+                name="comment"
+                id="comment"
+                placeholder="Ваше сообщение"
+                error={errors.comment?.message}
+              ></TextArea>
             </div>
           </div>
-          <div className="my-2">
-            <Label htmlFor="deliveryTime">Дом</Label>
-            <Input
-              min={getLocalDateTimeString()}
-              max={getLocalDateTimeTommorowString()}
-              register={register}
-              name={"deliveryTime"}
-              type={"datetime-local"}
-              id={"deliveryTime"}
-            ></Input>
+          <div className="my-4 space-y-2">
+            <Label htmlFor="deliveryTime">Желаемое время доставки</Label>
+            <div className="flex gap-2 flex-wrap">
+              <PrimaryButton
+                type="button"
+                variant={manual ? "outline" : "secondary"}
+                onClick={() => setManual(false)}
+              >
+                Как можно скорее
+              </PrimaryButton>
+              <PrimaryButton
+                type="button"
+                variant={manual ? "secondary" : "outline"}
+                onClick={() => setManual(true)}
+              >
+                Указать вручную
+              </PrimaryButton>
+            </div>
+            {manual && (
+              <div className="mt-4">
+                <Input
+                  min={getLocalDateTimeString()}
+                  max={getLocalDateTimeTommorowString()}
+                  {...register("deliveryTime")}
+                  name={"deliveryTime"}
+                  type={"datetime-local"}
+                  id={"deliveryTime"}
+                  error={errors.deliveryTime?.message}
+                ></Input>
+              </div>
+            )}
           </div>
         </div>
+
         <div className="mt-4 w-6/12 justify-self-center">
-          <SubmitButton>Отправить</SubmitButton>
+          <div className="flex justify-between items-center mt-4 text-base font-medium mb-2">
+            <span>Сумма к оплате:</span>
+            <span>{totalPrice} руб.</span>
+          </div>
+          <SubmitButton>Оформить заказ</SubmitButton>
         </div>
       </Form>
     </div>
@@ -154,25 +246,32 @@ function getLocalDateTimeTommorowString() {
 }
 
 function createOrderFromCart(
-  cart: CartMenuItem[],
+  cartState: CartState,
   userId: string,
-  restaurantId: string,
-  form: { address: Addresses; paymentMethod: PaymentMethod; deliveryTime: Date }
+  form: {
+    address: Addresses;
+    paymentMethod: PaymentMethod;
+    deliveryTime: Date;
+    comment: string;
+  }
 ): CreateOrder {
-  const orderItems: CreateOrderItem[] = cart.map((item) => ({
-    menuItemId: item.id,
-    price: item.price,
-    count: item.count,
-  }));
+  const orderItems: CreateOrderItem[] = Object.values(cartState.items).map(
+    (item) => ({
+      menuItemId: item.id,
+      price: item.price,
+      count: item.count,
+    })
+  );
 
   return {
     userId,
-    restaurantId,
+    restaurantId: cartState.restaurantId!,
     paymentMethod: form.paymentMethod,
     deliveryDetails: {
       address: form.address,
       deliveryTime: form.deliveryTime,
     },
     orderItems,
+    comment: form.comment,
   };
 }

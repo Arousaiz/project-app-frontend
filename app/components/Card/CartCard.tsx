@@ -7,7 +7,7 @@ import { useCart } from "~/providers/cartContext";
 import CartItem from "./cartitem";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import PrimaryButton from "../Buttons/PrimaryButton";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
 
 export default function Cart() {
   const {
@@ -20,13 +20,12 @@ export default function Cart() {
   } = useCart();
 
   const navigate = useNavigate();
-  const params = useParams();
 
   const itemsArray = Object.values(cart.items);
   const totalCount = itemsArray.reduce((acc, item) => acc + item.count, 0);
 
   const goToCheckout = () => {
-    navigate(`/order`, { state: { id: params.id } });
+    navigate(`/order`);
   };
 
   const handleClearCart = () => {
@@ -37,7 +36,11 @@ export default function Cart() {
 
   return (
     <div
-      className={`lg:sticky lg:right-2 lg:top-2 lg:flex relative hidden z-100 h-dvh w-96 rounded-xl flex-col transition-all shadow-md border border-border  duration-300`}
+      className={`lg:sticky lg:right-2 lg:top-2 lg:flex relative hidden z-100 h-dvh w-96 rounded-xl flex-col shadow-md border border-border transition-all duration-500 ease-in-out transform ${
+        itemsArray.length === 0
+          ? "opacity-50 scale-95"
+          : "opacity-100 scale-100"
+      }`}
     >
       {itemsArray.length === 0 ? (
         <div className="flex flex-col justify-center items-center p-6 bg-muted text-muted-foreground w-full h-full rounded-xl border border-border">
@@ -54,7 +57,7 @@ export default function Cart() {
               </PrimaryButton>
             </div>
           </div>
-          <div className="mx-4 p-6 overflow-auto h-full">
+          <div className="flex flex-col gap-4 p-6 overflow-auto h-full">
             {itemsArray.map((item) => (
               <CartItem
                 key={item.id}

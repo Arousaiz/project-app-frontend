@@ -9,5 +9,6 @@ export const OrderSchema = z.object({
     PaymentMethod.CASH,
     PaymentMethod.ONLINE,
   ]),
-  deliveryTime: z.coerce.date(),
+  comment: z.string().optional(),
+  deliveryTime: z.coerce.date().optional(),
 });

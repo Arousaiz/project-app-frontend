@@ -1,11 +1,19 @@
 import type { Favorites } from "~/types/favorite";
 import { instance } from "./api.config";
+import axios from "axios";
 
 export const FavoritesService = {
   fetchFavorites() {
-    return instance
-      .get("/user/favorites?limit=50&offset=0")
-      .then((res) => res.data.data);
+    return axios
+      .get("http://localhost:3000/user/favorites?limit=50&offset=0", {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      })
+      .then((res) => res.data.data)
+      .catch((error) => {
+        console.log(error);
+        return [];
+      });
   },
 
   createFavorite({
@@ -13,7 +21,7 @@ export const FavoritesService = {
     restaurantId,
   }: {
     menuItemId: string;
-    restaurantId: string;
+    restaurantId?: string;
   }) {
     return instance
       .post(`/user/favorites`, {

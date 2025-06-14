@@ -1,26 +1,39 @@
-import type { Restaurant } from "~/types/restaurant";
-import Modal from "../Modal/Modal";
-import {
-  ComputerDesktopIcon,
-  CreditCardIcon,
-  WalletIcon,
-} from "@heroicons/react/20/solid";
+import { isNullOrUndefined } from "~/utils/utils";
 import ReviewForm from "../Forms/ReviewForm";
+import Modal from "../ui/Modal";
+import type { Orders } from "~/types/order";
 
 export default function ReviewModal({
   open,
   onClose,
-  id,
+  order,
 }: {
   open: boolean;
   onClose: () => void;
-  id: string;
+  order?: Orders;
 }) {
-  return (
-    <Modal open={open} onClose={onClose}>
-      <div className="min-w-80">
-        <ReviewForm id={id}></ReviewForm>
-      </div>
-    </Modal>
-  );
+  if (!isNullOrUndefined(order) && order != undefined) {
+    const dto = {
+      id: order.id,
+      restaurant: {
+        id: order.restaurant.id,
+        name: order.restaurant.name,
+      },
+      orderItems: order.orderItems.map((item) => ({
+        id: item.menuItem.id,
+        name: item.menuItem.name,
+      })),
+    };
+    return (
+      <Modal open={open} onClose={onClose}>
+        <div className="min-w-80">
+          <ReviewForm order={dto} onClose={onClose} />
+        </div>
+      </Modal>
+    );
+  }
+
+  if (!open && isNullOrUndefined(order)) {
+    return null;
+  }
 }

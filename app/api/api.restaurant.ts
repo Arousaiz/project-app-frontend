@@ -3,6 +3,7 @@ import type { ApiData, ApiDataOne } from "~/utils/query-utils";
 import type { Promotions } from "~/types/promotions";
 import type { Cuisines, Restaurants } from "~/types/restaurant";
 import type { MenuItems } from "~/types/menuItem";
+import type { Reviews } from "~/types/review";
 
 export class RestaurantQuery {
   offset: string = "0";
@@ -15,9 +16,28 @@ export class RestaurantQuery {
 }
 
 export const RestaurantService = {
-  fetchRestaurants(offset: string = "0", limit: string = "10", city: string) {
+  fetchRestaurants(
+    offset: string = "0",
+    limit: string = "10",
+    city: string,
+    category?: string,
+    sortBy?: string,
+    sortOrder?: "ASC" | "DESC"
+  ) {
+    const params = new URLSearchParams({
+      limit,
+      offset,
+      city,
+    });
+
+    if (category) params.append("category", category);
+    if (sortBy) params.append("sortBy", sortBy);
+    if (sortOrder) params.append("sortOrder", sortOrder);
+
+    console.log(params);
+
     return instance
-      .get(`/restaurants/city?limit=${limit}&offset=${offset}&city=${city}`)
+      .get(`/restaurants/city?${params.toString()}`)
       .then((res) => res.data);
   },
 
@@ -25,9 +45,21 @@ export const RestaurantService = {
     return instance.get(`/cuisine/all`).then((res) => res.data);
   },
 
+  fetchReviews(id: string): Promise<ApiData<Reviews>> {
+    return instance
+      .get(`/restaurant/${id}/reviews?limit=${10}&offset=${0}`)
+      .then((res) => res.data);
+  },
+
   searchRestaurants(city: string, name: string) {
     return instance
       .get(`/restaurants/search?city=${city}&name=${name}`)
+      .then((res) => res.data.data);
+  },
+
+  searchCombined(city: string, name: string) {
+    return instance
+      .get(`/search?city=${city}&name=${name}`)
       .then((res) => res.data.data);
   },
 
@@ -48,6 +80,7 @@ export const RestaurantService = {
   },
 
   findRestaurant(id: string): Promise<ApiDataOne<Restaurants>> {
+    console.log("Test");
     return instance.get(`/restaurants/info/${id}`).then((res) => res.data);
   },
 };

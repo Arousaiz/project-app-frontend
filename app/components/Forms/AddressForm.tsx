@@ -1,24 +1,25 @@
 import {
   type RegisterOptions,
   type FieldValues,
-  type UseFormRegisterReturn,
   useForm,
 } from "react-hook-form";
-import Form from "./Form";
-import Input from "./Input";
-import Label from "./Label";
-import { useNavigate, useSubmit } from "react-router";
-import InputWithIcon from "./InputWithIcon";
-import { EnvelopeIcon, PhoneIcon } from "@heroicons/react/20/solid";
-import SubmitButton from "./SubmitButton";
+import Form from "../ui/Forms/Form";
+import Input from "../ui/Forms/Input";
+import Label from "../ui/Forms/Label";
+import { useFetcher, useNavigate, useSubmit } from "react-router";
+import SubmitButton from "../ui/Forms/SubmitButton";
 import { addressSchema } from "~/zodScheme/profileSchema";
-import type { Address } from "~/types/address";
+import type { Addresses } from "~/types/address";
 import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = addressSchema;
 
-export default function AddressForm({ address }: { address?: Address | null }) {
+export default function AddressForm({
+  address,
+}: {
+  address?: Addresses | null;
+}) {
   const {
     register,
     handleSubmit,
@@ -31,17 +32,13 @@ export default function AddressForm({ address }: { address?: Address | null }) {
       house: address?.house,
     },
   });
-  const submit = useSubmit();
-  const navigate = useNavigate();
+  const fetcher = useFetcher();
 
-  // usefetcher mb!!!
   const onSubmit = (data: FieldValues) => {
-    submit(data, {
+    fetcher.submit(data, {
       encType: "application/json",
       method: "POST",
-      action: "/action/update-address",
     });
-    setTimeout(() => navigate(0), 200);
   };
 
   return (
@@ -52,31 +49,34 @@ export default function AddressForm({ address }: { address?: Address | null }) {
             <div>
               <Label htmlFor="city">Город</Label>
               <Input
-                register={register}
+                {...register("city")}
                 name={"city"}
                 type={"text"}
                 id={"city"}
                 placeholder="Гродно"
+                error={errors.city?.message}
               ></Input>
             </div>
             <div className="my-2">
               <Label htmlFor="street">Улица</Label>
               <Input
-                register={register}
+                {...register("street")}
                 name={"street"}
                 type={"text"}
                 id={"street"}
                 placeholder="ул. Социалистическая"
+                error={errors.street?.message}
               ></Input>
             </div>
             <div className="my-2">
               <Label htmlFor="house">Дом</Label>
               <Input
-                register={register}
+                {...register("house")}
                 name={"house"}
                 type={"text"}
                 id={"house"}
                 placeholder="12"
+                error={errors.house?.message}
               ></Input>
             </div>
           </div>

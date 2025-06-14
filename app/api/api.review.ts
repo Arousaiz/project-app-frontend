@@ -1,11 +1,13 @@
 import { instance } from "./api.config";
 
 export const ReviewService = {
-  fetchReviews() {
-    return instance.get("/user/reviews").then((res) => res.data.data);
+  fetchReviews(limit = 50, offset = 0) {
+    return instance
+      .get("/user/reviews", { params: { limit, offset } })
+      .then((res) => res.data);
   },
 
-  writeReview(review: { menuItemId: string; rating: number; text: string }) {
+  writeReview(review: any) {
     return instance.post("/reviews/create", review).then((res) => res.data);
   },
 };

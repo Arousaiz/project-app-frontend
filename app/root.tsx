@@ -5,7 +5,6 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -13,14 +12,12 @@ import "./app.css";
 import { AuthProvider } from "./providers/authContext";
 import { ToastContainer } from "react-toastify";
 import { CartProvider } from "./providers/cartContext";
-import { FavoritesService } from "./api/api.favorites";
-import type { Favorites } from "./types/favorite";
 import { FavoritesProvider } from "./providers/favoritesContext";
 import { queryClient } from "./api/api.config";
 import React, { useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import Spinner from "./components/loading-spinner";
-import { ThemeProvider } from "./components/theme/theme-provider";
+import { ThemeProvider } from "./providers/theme-provider";
+import { Toaster } from "sonner";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -75,7 +72,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <ToastContainer />
+        <Toaster offset="10vh" position="top-center" />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -97,7 +94,9 @@ export default function App() {
       <ThemeProvider>
         <CartProvider>
           <AuthProvider>
-            <Outlet />
+            <FavoritesProvider>
+              <Outlet />
+            </FavoritesProvider>
           </AuthProvider>
         </CartProvider>
       </ThemeProvider>
@@ -105,13 +104,13 @@ export default function App() {
   );
 }
 
-export function HydrateFallback() {
-  return (
-    <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 bg-background/50 text-foreground/50 animate-fade-out">
-      <Spinner className="h-52 w-52" />
-    </div>
-  );
-}
+// export function HydrateFallback() {
+//   return (
+//     <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 bg-background/50 text-foreground/50 animate-fade-out">
+//       <Spinner className="h-52 w-52" />
+//     </div>
+//   );
+// }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";

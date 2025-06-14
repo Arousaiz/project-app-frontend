@@ -1,10 +1,10 @@
 import { InformationCircleIcon, StarIcon } from "@heroicons/react/20/solid";
 import { TruckIcon } from "@heroicons/react/20/solid";
-import Modal from "../Modal/Modal";
+import Modal from "../ui/Modal";
 import { useState } from "react";
 import ReviewCard from "./ReviewCard";
 import type { Reviews } from "~/types/review";
-import PrimaryButton from "../Buttons/PrimaryButton";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
 import ImageWithLoadingAndFallback from "./ImageWithFallback";
 import RestaurantInfoModal from "../Modals/RestaurantInfoModal";
 import { useQuery } from "@tanstack/react-query";
@@ -16,12 +16,26 @@ export default function RestaurantHeaderCard({
   onClick?: () => void;
   id: string;
 }) {
+  const [open, setOpen] = useState(false);
+  const [open1, setOpen1] = useState(false);
+
   const { data, isLoading } = useQuery({
     queryKey: ["restaurantInfo"],
     queryFn: () => RestaurantService.findRestaurant(id),
+    enabled: open,
   });
-  const [open, setOpen] = useState(false);
-  const [open1, setOpen1] = useState(false);
+
+  const {
+    data: reviewData,
+    isLoading: isLoadingReviews,
+    isError,
+  } = useQuery({
+    queryKey: ["restaurantReviews", id],
+    queryFn: () => RestaurantService.fetchReviews(id),
+    enabled: open1 && !!id,
+  });
+
+  console.log(data);
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4 md:p-6">
@@ -62,14 +76,21 @@ export default function RestaurantHeaderCard({
         id={id}
       ></RestaurantInfoModal>
       <Modal open={open1} onClose={() => setOpen1(false)}>
-        <div className="max-w-[72rem] lg:min-w-3xl">
-          <p className="text-3xl font-bold text-center">
+        <div>
+          <p className="text-3xl font-bold text-center mb-4">
             Отзывы от пользователей
           </p>
-          {data?.data.reviews?.length != 0 ? (
-            <div>
-              {data?.data.reviews?.map((item) => (
-                <ReviewCard review={item}></ReviewCard>
+
+          {isLoading ? (
+            <div className="text-center my-10">Загрузка отзывов...</div>
+          ) : isError ? (
+            <div className="text-center my-10 text-red-500">
+              Ошибка при загрузке отзывов
+            </div>
+          ) : reviewData?.data?.length ? (
+            <div className="space-y-4">
+              {reviewData.data.map((item) => (
+                <ReviewCard key={item.id} review={item} />
               ))}
             </div>
           ) : (

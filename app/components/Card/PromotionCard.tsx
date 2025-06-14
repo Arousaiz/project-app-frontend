@@ -15,7 +15,7 @@ export default function PromotionCard({
   onClick?: () => void;
 }) {
   const content = (
-    <Card className="relative group-hover:-translate-y-2">
+    <Card className="relative group-hover:-translate-y-2 hover:shadow-lg">
       <ImageWithLoadingAndFallback
         src="/app/assets/placeholder-image.jpg"
         fallbackSrc="/app/assets/placeholder-image.jpg"

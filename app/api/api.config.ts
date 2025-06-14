@@ -6,66 +6,56 @@ export const instance = axios.create({
   baseURL: "http://localhost:3000",
   headers: { "Content-Type": "application/json;charset=utf-8" },
   withCredentials: true,
+  timeout: 5000,
 });
 
 instance.interceptors.response.use(
   async (response) => {
-    // await new Promise(
-    //   (resolve) => setTimeout(resolve, Math.random() * 3000) // Random delay 0-3s
-    // );
+    // await new Promise(resolve => setTimeout(resolve, Math.random() * 3000));
     return response;
   },
   (error) => {
-    if (
-      error.response &&
-      (error.response.status === 401 || error.response.status === 403)
-    ) {
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
+    if (error.response) {
+      const status = error.response.status;
+
+      switch (status) {
+        case 400:
+          toast.error(
+            error.response.data?.message ||
+              "Неверный запрос (400). Проверьте введённые данные."
+          );
+          break;
+        case 401:
+        case 403:
+          toast.error("Доступ запрещён. Пожалуйста, войдите в систему.");
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          break;
+        case 404:
+          toast.error("Ресурс не найден (404).");
+          break;
+        case 500:
+          toast.error("Внутренняя ошибка сервера (500). Попробуйте позже.");
+          break;
+        default:
+          toast.error(
+            error.response.data?.message || "Произошла неизвестная ошибка."
+          );
       }
+    } else {
+      toast.error("Ошибка сети или сервер не отвечает.");
     }
-    if (error?.response?.data?.message) {
-      toast.error(error?.response?.data?.message);
-    }
-    return Promise.resolve({ data: null });
+
+    return Promise.reject(error);
   }
 );
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, // Не обновлять данные при фокусе окна
-      staleTime: 5 * 60 * 1000, // Данные считаются "свежими" 5 минут
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
-
-// instance.interceptors.request.use((config) => {
-//   config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
-//   return config;
-// });
-
-// instance.interceptors.response.use(
-//   (config) => {
-//     return config;
-//   },
-
-//   async (error) => {
-//     const originalRequest = { ...error.config };
-//     originalRequest._isRetry = true;
-//     if (
-//       error.response.status === 401 &&
-//       error.config &&
-//       !error.config._isRetry
-//     ) {
-//       try {
-//         const resp = await instance.get("/api/refresh");
-//         localStorage.setItem("token", resp.data.accessToken);
-//         return instance.request(originalRequest);
-//       } catch (error) {
-//         console.log("AUTH ERROR");
-//       }
-//     }
-//     throw error;
-//   }
-// );

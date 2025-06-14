@@ -1,24 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Dialog, DialogPanel, PopoverGroup } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import NavigationLink from "./NavigationLink";
-import SidebarNavLink from "./SidebarNavLink";
-import Logo from "./Logo";
-import { useNavigate } from "react-router";
+import { useState } from "react";
+import { PopoverGroup } from "@headlessui/react";
+import Logo from "../ui/Logo/Logo";
 import Search from "../Search/Search";
-import { AuthService } from "~/api/api.auth";
 import { ModeToggle } from "../theme/toggle-mode";
-import { Heart, History, Text, User } from "lucide-react";
+import {
+  AlignJustify,
+  ChevronDown,
+  Heart,
+  History,
+  Map,
+  Text,
+  User,
+} from "lucide-react";
 import CitySelectModal from "../Modals/CitySelectModal";
-import PrimaryButton from "../Buttons/PrimaryButton";
-import CitySelectMenu from "../Menu/Menus/CitySelectMenu";
-import ProfileMenu from "../Menu/Menus/ProfileMenu";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
+import CitySelectMenu from "../Menus/CitySelectMenu";
+import ProfileMenu from "../Menus/ProfileMenu";
 import Sidebar from "../Modals/Sidebar";
 import { useAuth } from "~/providers/authContext";
 import { isNullOrUndefined } from "~/utils/utils";
+import { PrimaryLink } from "../ui/Links/PrimaryLink";
+import { useNavigate } from "react-router";
 
 export const cities = [
   "Минск",
@@ -29,11 +33,16 @@ export const cities = [
   "Могилев",
 ];
 
-const nav = [
+export const nav = [
   {
     to: "/profile/settings",
     title: "Профиль",
     icon: User,
+  },
+  {
+    to: "/profile/address",
+    title: "Адрес",
+    icon: Map,
   },
   {
     to: "/profile/orders",
@@ -67,8 +76,12 @@ export default function Header() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await AuthService.logout();
-    return navigate("/login");
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -85,7 +98,11 @@ export default function Header() {
           <div className="hidden lg:flex ">
             <CitySelectMenu
               city={city}
-              setCity={(city) => setCity(city)}
+              setCity={(city) => {
+                setCity(city);
+                localStorage.setItem("city", city);
+                window.location.reload();
+              }}
             ></CitySelectMenu>
             <ModeToggle></ModeToggle>
           </div>
@@ -97,10 +114,7 @@ export default function Header() {
               onClick={() => setModalOpen(true)}
             >
               {city}
-              <ChevronDownIcon
-                aria-hidden="true"
-                className="ml-1 my-0.5 size-5"
-              />
+              <ChevronDown aria-hidden="true" className="ml-1 my-0.5 size-5" />
             </PrimaryButton>
           </div>
 
@@ -113,16 +127,16 @@ export default function Header() {
               className=""
             >
               <span className="sr-only">Открыть главное меню</span>
-              <Bars3Icon aria-hidden="true" className="size-6" />
+              <AlignJustify aria-hidden="true" className="size-6" />
             </PrimaryButton>
           </div>
         </div>
 
         <PopoverGroup className="hidden lg:flex lg:gap-x-12 lg:justify-end items-center">
           {base_nav.map((link) => (
-            <NavigationLink key={link.title} to={link.to}>
+            <PrimaryLink nav={true} key={link.title} to={link.to}>
               {link.title}
-            </NavigationLink>
+            </PrimaryLink>
           ))}
           {loggedIn ? (
             <div className={`hidden lg:flex lg:flex-1 lg:justify-end`}>
@@ -130,9 +144,9 @@ export default function Header() {
             </div>
           ) : (
             <div className={`${"hidden lg:flex lg:flex-1 lg:justify-end"}`}>
-              <NavigationLink to="/login">
+              <PrimaryLink nav={true} to="/login">
                 Войти <span aria-hidden="true">&rarr;</span>
-              </NavigationLink>
+              </PrimaryLink>
             </div>
           )}
         </PopoverGroup>
@@ -146,7 +160,11 @@ export default function Header() {
       ></Sidebar>
       <CitySelectModal
         city={city}
-        setCity={(city) => setCity(city)}
+        setCity={(city) => {
+          setCity(city);
+          localStorage.setItem("city", city);
+          window.location.reload();
+        }}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
       ></CitySelectModal>

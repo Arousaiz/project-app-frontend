@@ -4,9 +4,9 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { useCart } from "~/providers/cartContext";
-import PrimaryButton from "../Buttons/PrimaryButton";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
 import { useNavigate, useParams } from "react-router";
-import Modal from "../Modal/Modal";
+import Modal from "../ui/Modal";
 import CartItem from "../Card/cartitem";
 
 export default function CartModal({
@@ -58,24 +58,26 @@ export default function CartModal({
           </div>
         </div>
 
-        <div className="flex-1 place-self-stretch overflow-y-auto pt-20 pb-32 px-4">
+        <div className="flex-1 place-self-stretch overflow-y-auto pt-10 sm:pt-20 pb-32 px-4">
           {itemsArray.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <p className="text-2xl mb-4">Корзина пуста</p>
               <img src="/app/assets/empty_cart.png" alt="Пустая корзина" />
             </div>
           ) : (
-            itemsArray.map((item) => (
-              <CartItem
-                key={item.id}
-                name={item.name}
-                price={item.price}
-                count={item.count}
-                minusClick={() => decreaseQuantity(item.id)}
-                plusClick={() => increaseQuantity(item.id)}
-                deleteFromCart={() => removeFromCart(item.id)}
-              />
-            ))
+            <div className="flex flex-col gap-4 p-2">
+              {itemsArray.map((item) => (
+                <CartItem
+                  key={item.id}
+                  name={item.name}
+                  price={item.price}
+                  count={item.count}
+                  minusClick={() => decreaseQuantity(item.id)}
+                  plusClick={() => increaseQuantity(item.id)}
+                  deleteFromCart={() => removeFromCart(item.id)}
+                />
+              ))}
+            </div>
           )}
         </div>
 

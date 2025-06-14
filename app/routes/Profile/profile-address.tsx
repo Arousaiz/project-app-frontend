@@ -5,6 +5,7 @@ import ProfileContent from "~/components/Profile/ProfileContent";
 import AddressForm from "~/components/Forms/AddressForm";
 import { ProfileService } from "~/api/api.profile";
 import { isNullOrUndefined } from "~/utils/utils";
+import { toast } from "sonner";
 
 export async function clientLoader({ request }: Route.LoaderArgs) {
   const user = await ProfileService.fetchProfile();
@@ -14,11 +15,15 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 export async function clientAction({ request }: Route.ActionArgs) {
   let response = undefined;
   const data = await request.json();
-  response = await ProfileService.editAddress(data);
+  response = await ProfileService.editAddress(data).catch((error) =>
+    console.log(error)
+  );
 
   if (isNullOrUndefined(response)) {
     return { message: "Something went wrong" };
   }
+
+  toast.info("Успешно обновлено");
 
   return response;
 }

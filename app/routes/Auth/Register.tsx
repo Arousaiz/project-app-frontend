@@ -1,9 +1,9 @@
 import { redirect } from "react-router";
-import FormLogo from "~/components/Forms/FormLogo";
-import HelpLink from "~/components/Forms/HelpLink";
+import FormLogo from "~/components/ui/Logo/FormLogo";
 import type { Route } from "../../+types/root";
 import { AuthService } from "~/api/api.auth";
 import RegisterForm from "~/components/Forms/Auth/RegisterForm";
+import { PrimaryLink } from "~/components/ui/Links/PrimaryLink";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -42,7 +42,10 @@ export default function Register() {
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <RegisterForm></RegisterForm>
         <p className="mt-10 text-center small-text">
-          Уже есть аккаунт? <HelpLink to="/login">Войти</HelpLink>
+          Уже есть аккаунт?{" "}
+          <PrimaryLink className="underline" to="/login">
+            Войти
+          </PrimaryLink>
         </p>
       </div>
     </>

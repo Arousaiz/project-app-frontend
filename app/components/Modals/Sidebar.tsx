@@ -5,9 +5,9 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import PrimaryButton from "../Buttons/PrimaryButton";
-import Logo from "../Header/Logo";
-import SidebarNavLink from "../Header/SidebarNavLink";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
+import Logo from "../ui/Logo/Logo";
+import { PrimaryLink } from "../ui/Links/PrimaryLink";
 
 export default function Sidebar({
   mobileMenuOpen,
@@ -30,7 +30,7 @@ export default function Sidebar({
       onClose={setMobileMenuOpen}
       className="lg:hidden"
     >
-      <DialogPanel className="fixed inset-y-0 right-0 z-[1000] w-full overflow-y-auto px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-ring/10 bg-sidebar text-sidebar-foreground">
+      <DialogPanel className="fixed inset-y-0 right-0 z-[1000] w-full overflow-y-auto px-6 py-6 sm:max-w-sm sm:border-border sm:border-l bg-sidebar text-sidebar-foreground">
         <div className="flex items-center justify-between">
           <Logo>
             <span className="sr-only">Доставка еды</span>
@@ -50,9 +50,14 @@ export default function Sidebar({
           <div className="-my-6 divide-y divide-sidebar/10">
             <div className="space-y-2 py-6">
               {base_nav.map((link) => (
-                <SidebarNavLink key={link.to} to={link.to}>
+                <PrimaryLink
+                  nav={true}
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold hover:text-primary"
+                  key={link.to}
+                  to={link.to}
+                >
                   {link.title}
-                </SidebarNavLink>
+                </PrimaryLink>
               ))}
             </div>
 
@@ -73,21 +78,28 @@ export default function Sidebar({
                 {subMenuOpen && (
                   <div className="mt-2 space-y-1 pl-6">
                     {nav?.map((link) => (
-                      <SidebarNavLink
+                      <PrimaryLink
+                        nav={true}
                         key={link.to}
                         to={link.to}
-                        className="flex gap-x-4 items-center"
+                        className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold hover:text-primary gap-x-4 items-center"
                       >
                         {link.icon && <link.icon />}
                         {link.title}
-                      </SidebarNavLink>
+                      </PrimaryLink>
                     ))}
                   </div>
                 )}
               </div>
             ) : (
               <div className="py-6">
-                <SidebarNavLink to="/login">Войти</SidebarNavLink>
+                <PrimaryLink
+                  nav={true}
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold hover:text-primary"
+                  to="/login"
+                >
+                  Войти
+                </PrimaryLink>
               </div>
             )}
           </div>

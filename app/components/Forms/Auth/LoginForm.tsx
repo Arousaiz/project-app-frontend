@@ -1,15 +1,17 @@
-import { useForm, type FieldValues } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { authSchema } from "~/zodScheme/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import { useFetcher, useSubmit } from "react-router";
-import FetcherForm from "./FetcherForm";
-import CheckBoxInput from "../CheckBox";
-import HelpLink from "../HelpLink";
-import SubmitButton from "../SubmitButton";
-import Label from "../Label";
-import Input from "../Input";
-import Form from "../Form";
+import { useNavigate } from "react-router";
+import SubmitButton from "../../ui/Forms/SubmitButton";
+import Label from "../../ui/Forms/Label";
+import Input from "../../ui/Forms/Input";
+import Form from "../../ui/Forms/Form";
+import { useAuth } from "~/providers/authContext";
+import { PrimaryLink } from "~/components/ui/Links/PrimaryLink";
+import { CheckBox } from "~/components/ui/Buttons/Checkbox";
+import ErrorMessage from "../../ui/Forms/ErrorMessage";
+import { toast } from "sonner";
 
 const formScheme = authSchema.pick({
   username: true,
@@ -22,6 +24,8 @@ export default function LoginForm() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    control,
   } = useForm<z.infer<typeof formScheme>>({
     resolver: zodResolver(formScheme),
     defaultValues: {
@@ -30,13 +34,15 @@ export default function LoginForm() {
     },
   });
 
-  const submit = useSubmit();
+  const { user, login } = useAuth();
+  const navigate = useNavigate();
 
-  const onSubmit = (data: z.infer<typeof formScheme>) => {
-    submit(data, {
-      encType: "application/json",
-      method: "POST",
-    });
+  const onSubmit = async (data: z.infer<typeof formScheme>) => {
+    try {
+      await login(data);
+    } catch (err) {
+      toast.error("Произошла ошибка попробуйте ещё раз");
+    }
   };
 
   return (
@@ -45,37 +51,48 @@ export default function LoginForm() {
         <Label htmlFor="username">Имя пользователя</Label>
         <div className="mt-2">
           <Input
-            register={register}
+            {...register("username")}
             name="username"
             id="username"
             type="username"
-            errorField={errors.username}
+            error={errors.username?.message}
           ></Input>
         </div>
       </div>
       <div>
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Пароль</Label>
-          <HelpLink to="/restore-pass">Забыли пароль?</HelpLink>
+          <PrimaryLink className="underline" to="/restore-pass">
+            Забыли пароль?
+          </PrimaryLink>
         </div>
         <div className="mt-2">
           <Input
-            register={register}
+            {...register("password")}
             name="password"
             id="password"
             type="password"
-            errorField={errors.password}
+            error={errors.password?.message}
           ></Input>
         </div>
       </div>
       <Label htmlFor="remember">
         <div className="flex items-center">
-          <CheckBoxInput
-            register={register}
-            name={"remember"}
-            id={"remember"}
-          ></CheckBoxInput>
-          Запомнить меня
+          <Controller
+            name="remember"
+            control={control}
+            render={({ field }) => (
+              <div className="flex flex-col">
+                <CheckBox
+                  id="remember"
+                  label="Запомнить меня"
+                  checked={field.value}
+                  onChange={field.onChange}
+                />
+                <ErrorMessage errorField={errors.remember}></ErrorMessage>
+              </div>
+            )}
+          />
         </div>
       </Label>
       <div>

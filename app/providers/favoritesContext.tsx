@@ -1,34 +1,85 @@
-import React, { createContext, useContext, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext, useEffect } from "react";
+import { FavoritesService } from "~/api/api.favorites";
+import type { Favorites } from "~/types/favorite";
+import { useAuth } from "./authContext";
 
 type FavoritesContextType = {
-  favorites: string[];
-  addToFavorites: (id: string) => void;
-  removeFromFavorites: (id: string) => void;
-  isFavorite: (id: string) => boolean;
+  favorites: Favorites[];
+  isLoading: boolean;
+  isFavorite: (menuItemId: string) => boolean;
+  toggleFavorite: (menuItemId: string, restaurantId?: string) => void;
 };
 
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
-
 export const FavoritesProvider = ({
   children,
-  initialFavorites = [],
 }: {
   children: React.ReactNode;
-  initialFavorites?: string[];
 }) => {
-  const [favorites, setFavorites] = useState<string[]>(initialFavorites);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const addToFavorites = (id: string) =>
-    setFavorites((prev) => [...new Set([...prev, id])]);
+  const fetchFavoritesSafe = async (): Promise<Favorites[]> => {
+    try {
+      return await FavoritesService.fetchFavorites();
+    } catch (error) {
+      console.error("Error fetching favorites", error);
+      return [];
+    }
+  };
 
-  const removeFromFavorites = (id: string) =>
-    setFavorites((prev) => prev.filter((favId) => favId !== id));
+  const {
+    data: favorites = [],
+    isLoading,
+    refetch,
+  } = useQuery<Favorites[]>({
+    queryKey: ["favorites"],
+    queryFn: fetchFavoritesSafe,
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
 
-  const isFavorite = (id: string) => favorites.includes(id);
+  const addFavoriteMutation = useMutation({
+    mutationFn: FavoritesService.createFavorite,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+    },
+  });
+
+  const removeFavoriteMutation = useMutation({
+    mutationFn: FavoritesService.deleteFavorite,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+    },
+  });
+
+  const isFavorite = (menuItemId: string) =>
+    favorites.some((f) => f.menuItem?.id === menuItemId);
+
+  const toggleFavorite = (menuItemId: string, restaurantId?: string) => {
+    const existing = favorites.find((f) => f.menuItem?.id === menuItemId);
+    if (existing) {
+      removeFavoriteMutation.mutate(existing.id);
+    } else {
+      addFavoriteMutation.mutate({ menuItemId, restaurantId });
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      refetch();
+    }
+  }, [user, refetch]);
 
   return (
     <FavoritesContext.Provider
-      value={{ favorites, addToFavorites, removeFromFavorites, isFavorite }}
+      value={{
+        favorites,
+        isLoading,
+        isFavorite,
+        toggleFavorite,
+      }}
     >
       {children}
     </FavoritesContext.Provider>

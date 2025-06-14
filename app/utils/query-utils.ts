@@ -23,10 +23,10 @@ async function checkQuery(key: string, queryFn: any, queryClient: QueryClient) {
   if (await queryClient.getQueryData([key])) {
     invalidateQueries(key, queryClient);
   } else {
-    queryClient.prefetchQuery({
-      queryKey: [key],
-      queryFn: () => queryFn,
-    });
+    // queryClient.prefetchQuery({
+    //   queryKey: [key],
+    //   queryFn: () => queryFn,
+    // });
   }
 }
 

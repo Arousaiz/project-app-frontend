@@ -280,8 +280,7 @@ html.theme-transition *::after {
 
   .scrollbar-gutter-stable {
     scrollbar-gutter: stable;
-    /* fallback: резервируем место справа */
-    padding-right: 16px; /* под ширину скроллбара */
+    padding-right: 16px;
     padding-top: 4px;
     padding-bottom: 4px;
   }
@@ -323,6 +322,20 @@ html.theme-transition *::after {
 }
 
 @layer components {
+
+  .highlight {
+    animation: highlightFade 3s ease forwards;
+    background-color: #fff3b0;
+  }
+
+  @keyframes highlightFade {
+    0% {
+      background-color: #fff3b0;
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
 
 }
 

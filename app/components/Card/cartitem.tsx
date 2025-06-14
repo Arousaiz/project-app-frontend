@@ -1,4 +1,4 @@
-import CounterButton from "../Buttons/CounterButton";
+import CounterButton from "../ui/Buttons/CounterButton";
 
 export default function CartItem({
   name,
@@ -16,13 +16,13 @@ export default function CartItem({
   deleteFromCart: () => void;
 }) {
   return (
-    <div className="grid grid-cols-3 ">
-      <div>
-        <p>{name}</p>
-        {/* <p className="">Additional info</p> */}
+    <div className="flex justify-between shadow-sm hover:shadow-md  items-center py-4 border border-border/50  transition-all duration-300 ease-in-out  rounded-lg px-2">
+      <div className="flex flex-col">
+        <p className="text-base font-medium">{name}</p>
+        <p className="text-sm text-muted-foreground">{price} руб.</p>
       </div>
-      <p className="text-center">{price}p</p>
-      <div className="items-center">
+
+      <div className="flex-shrink-0">
         <CounterButton
           count={count}
           minusClick={minusClick}

@@ -1,8 +1,7 @@
 import { BookmarkIcon, StarIcon, TruckIcon } from "@heroicons/react/20/solid";
 import { Link, redirect } from "react-router";
 import type { RestaurantCardInfo } from "~/types/restaurant";
-import PrimaryBadge from "../Badges/PrimaryBadge";
-import SecondaryBadge from "../Badges/SecondaryBadge";
+import PrimaryBadge from "../ui/Badges/PrimaryBadge";
 import { Card, CardContent, CardFooter } from "./Card";
 import ImageWithLoadingAndFallback from "./ImageWithFallback";
 
@@ -15,7 +14,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
 
   return (
     <Link to={`/restaurant/${restaurant?.id}`} className="">
-      <Card className="w-full h-full relative hover:-translate-y-2">
+      <Card className="w-full h-full relative hover:-translate-y-2 hover:shadow-lg">
         <ImageWithLoadingAndFallback
           size="h-9/12 md:h-8/12"
           src="/app/assets/placeholder-image.jpg"
@@ -29,7 +28,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
             <p className="font-bold line-clamp-1">{restaurant?.name}</p>
             <div className="flex items-center">
               <p className="font-bold">
-                {restaurant?.rating ? restaurant.rating : "No rating"}
+                {restaurant?.rating ? restaurant.rating : "--- "}
               </p>
               <StarIcon className="size-4"></StarIcon>
             </div>
@@ -41,7 +40,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
         </CardContent>
         <CardFooter className="gap-2 py-1 md:py-2">
           <PrimaryBadge>Бесплатная доставка</PrimaryBadge>
-          <SecondaryBadge>-20% скидки</SecondaryBadge>
+          {/* <PrimaryBadge variant="secondary">-20% скидки</PrimaryBadge> */}
         </CardFooter>
       </Card>
     </Link>

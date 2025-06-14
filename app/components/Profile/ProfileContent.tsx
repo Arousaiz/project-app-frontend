@@ -1,28 +1,6 @@
 import { Heart, History, Text, User } from "lucide-react";
-import NavigationLink from "../Header/NavigationLink";
-
-const nav = [
-  {
-    to: "/profile/settings",
-    title: "Профиль",
-    icon: User,
-  },
-  {
-    to: "/profile/orders",
-    title: "Заказы",
-    icon: History,
-  },
-  {
-    to: "/profile/reviews",
-    title: "Отзывы",
-    icon: Text,
-  },
-  {
-    to: "/profile/favorites",
-    title: "Избранное",
-    icon: Heart,
-  },
-];
+import { PrimaryLink } from "../ui/Links/PrimaryLink";
+import { nav } from "../Header/Header";
 
 export default function ProfileContent({
   children,
@@ -35,13 +13,14 @@ export default function ProfileContent({
           <div className="flex flex-col gap-2 p-4 text-sm top-12">
             {nav?.length ? (
               nav.map((link) => (
-                <NavigationLink
+                <PrimaryLink
+                  nav={true}
                   to={link.to}
                   className="flex justify-between border-2 hover:border-primary rounded-xl p-4 hover:-translate-y-1 transition-all text-base"
                 >
                   {link.title}
                   {link.icon && <link.icon />}
-                </NavigationLink>
+                </PrimaryLink>
               ))
             ) : (
               <div></div>

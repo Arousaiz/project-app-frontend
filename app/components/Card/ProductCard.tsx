@@ -2,26 +2,31 @@ import { PlusIcon } from "@heroicons/react/20/solid";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { useCart } from "~/providers/cartContext";
 import type { MenuItemInfo } from "~/types/menuItem";
-import CounterButton from "../Buttons/CounterButton";
+import CounterButton from "../ui/Buttons/CounterButton";
 import { useFavorites } from "~/providers/favoritesContext";
-import { useFetcher, useParams } from "react-router";
 import { Card, CardContent } from "./Card";
 import ImageWithLoadingAndFallback from "./ImageWithFallback";
 import { Bookmark } from "lucide-react";
-import PrimaryButton from "../Buttons/PrimaryButton";
-import { useConfirmAddToCart } from "~/utils/cart";
-import ConfirmDialog from "../Dialogs/ConfirmDialog";
+import PrimaryButton from "../ui/Buttons/PrimaryButton";
+import { useConfirmAddToCart } from "~/hooks/use-cart";
+import { useAuth } from "~/providers/authContext";
+import { PromotionType, type Promotions } from "~/types/promotions";
+import ConfirmDialog from "../ui/Dialogs/ConfirmDialog";
 
 export default function ProductCard({
   menuItem,
+  promotion,
   restaurantId,
   openReview,
   onClick,
+  id,
 }: {
+  promotion?: Promotions;
   menuItem: MenuItemInfo;
   restaurantId: string;
   openReview: () => void;
   onClick?: () => void;
+  id: string;
 }) {
   const {
     cart,
@@ -32,24 +37,9 @@ export default function ProductCard({
   } = useCart();
   const { requestAddToCart, isConfirmOpen, confirmAdd, cancelAdd } =
     useConfirmAddToCart();
-  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
-  const fetcher = useFetcher();
-  const { id } = useParams();
-
-  const toggleFavorite = (isFavorite: boolean) => {
-    fetcher.submit(
-      JSON.stringify({
-        _intent: isFavorite ? "remove" : "add",
-        menuItemId: menuItem.id,
-        restaurantId: id!,
-      }),
-      {
-        method: "post",
-        encType: "application/json",
-      }
-    );
-    isFavorite ? removeFromFavorites(menuItem.id) : addToFavorites(menuItem.id);
-  };
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { user } = useAuth();
+  const showFavorites = user !== null;
 
   const isInCart = isItemInCart(menuItem.id);
   const isInFavorites = isFavorite(menuItem.id);
@@ -61,8 +51,9 @@ export default function ProductCard({
 
   return (
     <Card
-      className="w-full h-full  mx-auto relative hover:-translate-y-2"
+      className="w-full h-full  mx-auto relative hover:-translate-y-2 hover:shadow-lg"
       onClick={onClick}
+      id={id}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
         <ImageWithLoadingAndFallback
@@ -72,22 +63,45 @@ export default function ProductCard({
           className="w-full h-full object-cover"
           isInCard={true}
         ></ImageWithLoadingAndFallback>
-        <PrimaryButton
-          variant="secondary"
-          size="icon"
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFavorite(isInFavorites);
-          }}
-          className={`absolute top-2 right-2`}
-        >
-          <Bookmark
-            className={`size-8 p-1 ${
-              isInFavorites ? "bg-secondary-foreground " : " "
-            }`}
-          />
-        </PrimaryButton>
+        {promotion && (
+          <div
+            className={`
+            absolute top-2 left-2 px-2 py-1 rounded shadow-md select-none z-10
+            ${
+              promotion.promotionType === PromotionType.DISCOUNT
+                ? "bg-red-600 text-white"
+                : promotion.promotionType === PromotionType.FREE_ITEM
+                ? "bg-green-600 text-white"
+                : "bg-gray-600 text-white"
+            }
+            `}
+          >
+            {promotion.promotionType === PromotionType.DISCOUNT &&
+              `Скидка ${promotion.discount}%`}
+            {promotion.promotionType === PromotionType.FREE_ITEM &&
+              `${promotion.requiredCount}+1`}
+          </div>
+        )}
+        {showFavorites && (
+          <PrimaryButton
+            variant="secondary"
+            size="icon"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(menuItem.id);
+            }}
+            className={`absolute top-2 right-2`}
+          >
+            <Bookmark
+              className={`size-8 p-1 ${
+                isInFavorites
+                  ? "text-amber-300 dark:text-yellow-400"
+                  : "text-gray-400"
+              }`}
+            />
+          </PrimaryButton>
+        )}
         {menuItem.rating && (
           <PrimaryButton
             variant="secondary"
@@ -114,14 +128,32 @@ export default function ProductCard({
           </p>
         </div>
         <div className="flex justify-between items-center pt-2">
-          <p className="font-bold">{menuItem.price}p</p>
+          <div>
+            {promotion ? (
+              <>
+                <span className="line-through text-muted-foreground">
+                  {menuItem.price}p
+                </span>{" "}
+                <span className="text-primary">
+                  {Math.round(menuItem.price * (1 - promotion.discount / 100))}p
+                </span>
+              </>
+            ) : (
+              <span>{menuItem.price}p</span>
+            )}
+          </div>
           {isInCart ? (
-            <CounterButton
-              count={count}
-              minusClick={() => decreaseQuantity(menuItem.id)}
-              plusClick={() => increaseQuantity(menuItem.id)}
-              deleteFromCart={() => removeFromCart(menuItem.id)}
-            />
+            <div
+              key="counter"
+              className="transition-all duration-300  ease-in-out opacity-100 scale-100"
+            >
+              <CounterButton
+                count={count}
+                minusClick={() => decreaseQuantity(menuItem.id)}
+                plusClick={() => increaseQuantity(menuItem.id)}
+                deleteFromCart={() => removeFromCart(menuItem.id)}
+              />
+            </div>
           ) : (
             <PrimaryButton
               size="icon"
@@ -129,6 +161,7 @@ export default function ProductCard({
                 e.stopPropagation();
                 handleAddToCart();
               }}
+              className="transition-all duration-300 ease-in-out opacity-100 scale-100"
             >
               <PlusIcon className="size-8 p-1" />
             </PrimaryButton>

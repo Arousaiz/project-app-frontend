@@ -1,5 +1,5 @@
 import { cities } from "../Header/Header";
-import Modal from "../Modal/Modal";
+import Modal from "../ui/Modal";
 
 export default function CitySelectModal({
   open,

@@ -12,7 +12,6 @@ export default [
     route("/restore-pass", "./routes/Auth/RestorePage.tsx"),
     route("/reset-pass", "./routes/Auth/ResetPassPage.tsx"),
   ]),
-  route("/logout", "routes/logout.tsx"),
   layout("./components/Layouts/Layout.tsx", [
     index("./routes/HomePage.tsx"),
     route("/about", "./routes/Info/About.tsx"),
@@ -28,6 +27,7 @@ export default [
     route("/test", "./routes/Test.tsx"),
     route("/restaurant/:id", "./routes/RestaurantPage.tsx"),
     route("/order", "./routes/place-order.tsx"),
+    route("/order/success", "./routes/order-success.tsx"),
   ]),
   route("/.well-known/appspecific/:path", "./routes/action.stfuplz.ts"),
 ] satisfies RouteConfig;

@@ -1,5 +1,5 @@
 import type { Promotions } from "~/types/promotions";
-import Modal from "../Modal/Modal";
+import Modal from "../ui/Modal";
 import ImageWithLoadingAndFallback from "../Card/ImageWithFallback";
 
 export default function PromotionModal({

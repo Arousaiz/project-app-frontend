@@ -1,10 +1,10 @@
 import { useForm, type FieldValues } from "react-hook-form";
 import type { z } from "zod";
 import { useSubmit } from "react-router";
-import SubmitButton from "../SubmitButton";
-import Label from "../Label";
-import Input from "../Input";
-import Form from "../Form";
+import SubmitButton from "../../ui/Forms/SubmitButton";
+import Label from "../../ui/Forms/Label";
+import Input from "../../ui/Forms/Input";
+import Form from "../../ui/Forms/Form";
 import { authSchema } from "~/zodScheme/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -44,11 +44,11 @@ export default function ResetPasswordForm() {
         <Label htmlFor="confirmPassword">Код подтверждения</Label>
         <div className="mt-2">
           <Input
-            register={register}
+            {...register("confirmPassword")}
             name="confirmPassword"
             id="confirmPassword"
             type="confirmPassword"
-            errorField={errors.confirmPassword}
+            error={errors.confirmPassword?.message}
           ></Input>
         </div>
       </div>
@@ -56,11 +56,11 @@ export default function ResetPasswordForm() {
         <Label htmlFor="password">Пароль</Label>
         <div className="mt-2">
           <Input
-            register={register}
+            {...register("password")}
             name="password"
             id="password"
             type="password"
-            errorField={errors.password}
+            error={errors.password?.message}
           ></Input>
         </div>
       </div>
@@ -68,14 +68,11 @@ export default function ResetPasswordForm() {
         <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
         <div className="mt-2">
           <Input
-            register={register}
-            validateOptions={{
-              required: { value: true, message: "Confirm your password" },
-            }}
+            {...register("confirmPassword")}
             name="confirmPassword"
             id="confirmPassword"
             type="confirmPassword"
-            errorField={errors.confirmPassword}
+            error={errors.confirmPassword?.message}
           ></Input>
         </div>
       </div>

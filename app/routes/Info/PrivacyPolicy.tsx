@@ -1,87 +1,106 @@
+const sections = [
+  {
+    title: "1. Какие данные мы собираем",
+    list: [
+      "Имя и контактные данные (телефон, email)",
+      "Адрес доставки",
+      "Данные об устройствах и IP-адрес",
+      "История заказов и предпочтения",
+      "Файлы cookie и данные о действиях на сайте",
+    ],
+  },
+  {
+    title: "2. Зачем мы используем эти данные",
+    list: [
+      "Для обработки и доставки заказов",
+      "Для связи с вами по вопросам заказов",
+      "Для улучшения качества сервиса и персонализации",
+      "Для отправки акций и новостей (если вы дали согласие)",
+      "Для соблюдения законов и требований",
+    ],
+  },
+  {
+    title: "3. Передача данных третьим лицам",
+    paragraph: "Мы можем передавать данные только в следующих случаях:",
+    list: [
+      "Ресторанам — для выполнения вашего заказа",
+      "Курьерам — для доставки",
+      "Партнёрам — для аналитики и рекламы (только обезличенные данные)",
+      "Госорганам — по требованию закона",
+    ],
+  },
+  {
+    title: "4. Хранение и защита данных",
+    paragraph:
+      "Мы используем современные методы защиты информации и не храним персональные данные дольше, чем это необходимо.",
+  },
+  {
+    title: "5. Ваши права",
+    list: [
+      "Получить доступ к своим данным",
+      "Изменить или удалить свои данные",
+      "Отозвать согласие на обработку",
+      "Отключить cookies в браузере",
+    ],
+  },
+  {
+    title: "6. Использование файлов cookie",
+    paragraph:
+      "Файлы cookie используются для работы сайта, аналитики и персонализации контента. Вы можете изменить настройки в браузере.",
+  },
+];
+
+function PrivacySection({
+  title,
+  paragraph,
+  list,
+}: {
+  title: string;
+  paragraph?: string;
+  list?: string[];
+}) {
+  return (
+    <div className="mb-6">
+      <h2>{title}</h2>
+      {paragraph && <p className="mt-2">{paragraph}</p>}
+      {list && (
+        <ul className="list-decimal list-inside mt-2 space-y-1">
+          {list.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function PrivacyPolicy() {
   return (
-    <div className="flex flex-col justify-center mx-auto max-w-4xl my-10">
-      <h1 className="text-center">Политика конфиденциальности</h1>
-      <p className="large-text indent-4">
+    <div className="flex flex-col justify-center mx-auto max-w-4xl my-10 px-4">
+      <h1>Политика конфиденциальности</h1>
+      <p className="text-lg indent-4 mt-4">
         Настоящая Политика конфиденциальности описывает, как сервис «Доставка
-        еды» (далее — «мы», «наш сайт») собирает, использует и защищает
-        персональные данные пользователей.
+        еды» собирает, использует и защищает персональные данные пользователей.
       </p>
-      <div className="mx-4 my-2">
-        <h3 className="paragraph-header">1. Какие данные мы собираем</h3>
-        <ul className="list-decimal-inside">
-          <li>Имя и контактные данные (телефон, email)</li>
-          <li>Адрес доставки</li>
-          <li>Данные об устройствах и IP-адрес</li>
-          <li>История заказов и предпочтения</li>
-          <li>Файлы cookie и данные о действиях на сайте</li>
-        </ul>
-      </div>
 
-      <div className="mx-4 my-2">
-        <h3 className="paragraph-header">2. Зачем мы используем эти данные</h3>
-        <ul className="list-decimal-inside">
-          <li>Для обработки и доставки заказов</li>
-          <li>Для связи с вами по вопросам заказов</li>
-          <li>Для улучшения качества сервиса и персонализации</li>
-          <li>Для отправки акций и новостей (если вы дали согласие)</li>
-          <li>Для соблюдения законов и требований</li>
-        </ul>
-      </div>
+      {sections.map((section, idx) => (
+        <PrivacySection key={idx} {...section} />
+      ))}
 
-      <div className="mx-4 my-2">
-        <h3 className="paragraph-header">3. Передача данных третьим лицам</h3>
-        <p className="paragraph">
-          Мы можем передавать данные только в следующих случаях:
-        </p>
-        <ul className="list-decimal-inside">
-          <li>Ресторанам — для выполнения вашего заказа</li>
-          <li>Курьерам — для доставки</li>
-          <li>
-            Партнёрам — для аналитики и рекламы (только обезличенные данные)
-          </li>
-          <li>Госорганам — по требованию закона</li>
-        </ul>
-      </div>
-
-      <div className="mx-4 my-2">
-        <h3 className="paragraph-header">4. Хранение и защита данных</h3>
-        <p className="paragraph">
-          Мы используем современные методы защиты информации и не храним
-          персональные данные дольше, чем это необходимо.
-        </p>
-      </div>
-
-      <div className="mx-4 my-2">
-        <h3 className="paragraph-header">5. Ваши права</h3>
-        <ul className="list-decimal-inside">
-          <li>Получить доступ к своим данным</li>
-          <li>Изменить или удалить свои данные</li>
-          <li>Отозвать согласие на обработку</li>
-          <li>Отключить cookies в браузере</li>
-        </ul>
-      </div>
-      <div className="mx-4 my-2">
-        <h3 className="paragraph-header">6. Использование файлов cookie</h3>
-        <p className="paragraph">
-          Файлы cookie используются для работы сайта, аналитики и персонализации
-          контента. Вы можете изменить настройки в браузере.
-        </p>
-      </div>
-      <div className="mx-4 my-4">
-        <h3 className="paragraph-header">Контакты</h3>
-        <p className="paragraph">
+      <div className="mb-6">
+        <h3>Контакты</h3>
+        <p className="mt-2">
           Если у вас есть вопросы по поводу вашей конфиденциальности, свяжитесь
           с нами:
         </p>
-        <p>
-          Email: privacyemail@email.com
+        <p className="mt-1">
+          <strong>Email:</strong> privacyemail@email.com
           <br />
-          Телефон: +375 33 11 33 369
+          <strong>Телефон:</strong> +375 33 11 33 369
         </p>
       </div>
 
-      <p>
+      <p className="text-sm text-muted-foreground">
         <strong>Дата обновления:</strong> 1 мая 2025 года
       </p>
     </div>
