@@ -166,7 +166,12 @@ export default function RestaurantPage() {
                 ? Array.from({ length: 2 }).map((_, i) => <SkeletonCard />)
                 : promotions?.length &&
                   promotions.map((item) => (
-                    <PromotionCard key={item.id} promo={item} />
+                    <PromotionCard
+                      key={item.id}
+                      promo={item}
+                      shouldWrapInLink={false}
+                      onClick={() => setSelectedPromo(item)}
+                    />
                   ))}
             </Carousel>
           </div>
@@ -253,7 +258,6 @@ export default function RestaurantPage() {
           </div>
           <Cart></Cart>
         </div>
-        <div className="min-h-screen"></div>
       </div>
 
       {selectedItem && (

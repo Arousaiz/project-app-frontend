@@ -16,8 +16,8 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
     <Link to={`/restaurant/${restaurant?.id}`} className="">
       <Card className="w-full h-full relative hover:-translate-y-2 hover:shadow-lg">
         <ImageWithLoadingAndFallback
-          size="h-9/12 md:h-8/12"
-          src="/app/assets/placeholder-image.jpg"
+          size="w-full h-40"
+          src={`https://pub-96480823ba5d4f44bb4d8cd67febd2f1.r2.dev/${restaurant.img_url}`}
           fallbackSrc="/app/assets/placeholder-image.jpg"
           alt={`Изображение ресторана ${restaurant?.name}`}
           className="rounded-t-xl"

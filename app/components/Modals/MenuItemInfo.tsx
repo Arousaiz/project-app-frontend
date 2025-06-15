@@ -50,7 +50,10 @@ export default function ProductModal({
       <div className="flex flex-col lg:flex-row gap-4 w-full relative py-4">
         <div className="w-full lg:w-2/3 sm:h-auto">
           <img
-            src={item?.img_url || "/app/assets/placeholder-image.jpg"}
+            src={
+              `https://pub-96480823ba5d4f44bb4d8cd67febd2f1.r2.dev/${item.img_url}` ||
+              "/app/assets/placeholder-image.jpg"
+            }
             alt={item?.name}
             className="object-cover w-full h-full rounded-xl"
           />

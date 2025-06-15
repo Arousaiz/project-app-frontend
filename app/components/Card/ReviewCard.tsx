@@ -4,26 +4,30 @@ import { Card } from "./Card";
 
 export default function ReviewCard({ review }: { review?: Reviews }) {
   return (
-    <Card className="w-full min-h-32 mx-auto my-4 rounded-lg shadow flex flex-col relative p-4">
-      <div className="flex justify-between">
-        <div className="flex">
-          <div className="mt-1 mx-4 flex">
-            <p className="font-semibold">{review?.rating}</p>
-            <StarIcon className="size-4 mt-1 ml-1 text-yellow-300" />
+    <Card className="w-full min-h-32 my-4 rounded-lg shadow flex flex-col p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-1 text-sm font-semibold text-yellow-500">
+            <span>{review?.rating}</span>
+            <StarIcon className="w-4 h-4" />
           </div>
-          <p className="font-bold mt-1 mx-4 line-clamp-1">
+          <p className="font-bold text-base line-clamp-1">
             {review?.menuItem?.name ??
               (review?.restaurant?.name
                 ? `${review.restaurant.name} (ресторан)`
                 : "Без названия")}
           </p>
         </div>
-        <p className="text-muted-foreground font-medium mt-1 mx-4 line-clamp-1">
+
+        <p className="text-sm text-muted-foreground font-medium whitespace-nowrap">
           {new Date(review?.createdAt!).toLocaleString()}
         </p>
       </div>
-      <div className="line-clamp-6 mx-4">
-        <p>{review?.text}</p>
+
+      <div className="mt-3">
+        <p className="text-sm leading-relaxed whitespace-pre-line">
+          {review?.text}
+        </p>
       </div>
     </Card>
   );

@@ -26,7 +26,7 @@ export default function ContactForm() {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} className={""}>
-      <Label htmlFor="name">Name</Label>
+      <Label htmlFor="name">Ваше имя(или ФИО)</Label>
       <div className="my-2">
         <Input
           {...register("name")}
@@ -37,7 +37,7 @@ export default function ContactForm() {
           error={errors.name?.message?.toString()}
         ></Input>
       </div>
-      <Label htmlFor="email">Email</Label>
+      <Label htmlFor="email">Почта</Label>
       <div className="my-2">
         <Input
           {...register("email")}
@@ -49,7 +49,7 @@ export default function ContactForm() {
           icon={<EnvelopeIcon className="size-5 "></EnvelopeIcon>}
         ></Input>
       </div>
-      <Label htmlFor="phone">Phone(optional)</Label>
+      <Label htmlFor="phone">Телефон</Label>
       <div className="my-2">
         <Input
           {...register("email")}
@@ -61,7 +61,7 @@ export default function ContactForm() {
           icon={<PhoneIcon className="size-5"></PhoneIcon>}
         ></Input>
       </div>
-      <Label htmlFor="text">Message</Label>
+      <Label htmlFor="text">Сообщение</Label>
       <div className="my-2">
         <TextArea
           {...register("text")}

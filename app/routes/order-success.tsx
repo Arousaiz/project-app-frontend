@@ -1,13 +1,17 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Link } from "react-router";
 import { PrimaryLink } from "~/components/ui/Links/PrimaryLink";
 import { useCart } from "~/providers/cartContext";
 
 export default function OrderSuccessPage() {
+  const queryClient = useQueryClient();
+
   const { clearCart } = useCart();
 
   useEffect(() => {
     clearCart();
+    queryClient.invalidateQueries({ queryKey: ["profileOrders"] });
   }, []);
 
   return (

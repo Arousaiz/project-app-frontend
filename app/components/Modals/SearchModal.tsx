@@ -2,7 +2,6 @@ import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import Modal from "../ui/Modal";
 import type { Restaurants } from "~/types/restaurant";
 import LoadingSpinner from "../ui/Spinners/LoadingSpinner";
-import PrimaryBadge from "../ui/Badges/PrimaryBadge";
 import type { MenuItems } from "~/types/menuItem";
 
 export default function SearchModal({

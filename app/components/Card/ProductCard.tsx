@@ -57,7 +57,7 @@ export default function ProductCard({
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
         <ImageWithLoadingAndFallback
-          src="/app/assets/placeholder-image.jpg"
+          src={`https://pub-96480823ba5d4f44bb4d8cd67febd2f1.r2.dev/${menuItem.img_url}`}
           fallbackSrc="/app/assets/placeholder-image.jpg"
           alt={`Изображение ресторана ${menuItem?.name}`}
           className="w-full h-full object-cover"

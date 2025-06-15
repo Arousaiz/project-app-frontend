@@ -17,7 +17,7 @@ export default function PromotionCard({
   const content = (
     <Card className="relative group-hover:-translate-y-2 hover:shadow-lg">
       <ImageWithLoadingAndFallback
-        src="/app/assets/placeholder-image.jpg"
+        src={`https://pub-96480823ba5d4f44bb4d8cd67febd2f1.r2.dev/${promo?.img_url}`}
         fallbackSrc="/app/assets/placeholder-image.jpg"
         alt={`Изображение акции ${promo?.title}`}
         className="rounded-t-xl w-full h-[160px] object-cover"
@@ -27,7 +27,7 @@ export default function PromotionCard({
         <p className={`font-bold text-base line-clamp-1`}>
           {promo?.title ? promo.title : "нет названия"}
         </p>
-        <p className="text-sm text-muted-foreground line-clamp-2">
+        <p className="text-sm text-muted-foreground line-clamp-1">
           {promo?.description ? promo.description : "нет описания"}
         </p>
       </CardContent>

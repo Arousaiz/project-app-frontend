@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image } from "lucide-react";
 import { cn } from "~/utils/utils";
 
-type ImageWithLoadingAndFallbackProps = {
+type Props = {
   src: string;
   fallbackSrc: string;
   alt: string;
@@ -21,15 +21,23 @@ export default function ImageWithLoadingAndFallback({
   isInCard = false,
   rounded = true,
   ...props
-}: ImageWithLoadingAndFallbackProps) {
+}: Props) {
   const [imgSrc, setImgSrc] = useState(src);
   const [loading, setLoading] = useState(true);
+
+  // 🔥 обновляем изображение при изменении src
+  useEffect(() => {
+    if (src) {
+      setImgSrc(src);
+      setLoading(true); // показать прелоадер снова
+    }
+  }, [src]);
 
   return (
     <div className={cn("relative overflow-hidden", size)}>
       {loading && (
         <div className="flex items-center justify-center absolute inset-0 bg-gray-400 animate-pulse rounded-md">
-          <Image></Image>
+          <Image />
         </div>
       )}
 

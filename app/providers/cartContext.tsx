@@ -165,10 +165,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const totalPrice = useMemo(() => {
-    return Object.values(state.items).reduce(
+    const total = Object.values(state.items).reduce(
       (sum, item) => sum + item.price * item.count,
       0
     );
+    return Math.round(total * 100) / 100;
   }, [state]);
 
   return (

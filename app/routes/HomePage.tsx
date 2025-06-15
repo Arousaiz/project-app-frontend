@@ -127,28 +127,26 @@ export default function HomePage() {
       <div className="flex justify-between p-4">
         <div
           ref={containerRef}
-          className="flex justify-between p-4 overflow-x-auto md:overflow-hidden lg:max-w-xl sticky top-0 z-[1000] space-x-2 hide-scrollbar"
+          className="flex justify-between p-4 overflow-x-auto lg:overflow-hidden lg:max-w-2xl sticky top-0 z-[1000] hide-scrollbar"
         >
-          {!isLoadingCuisines && (
-            <div className="space-x-2">
-              <PrimaryButton
-                data-element="filter"
-                variant="secondary"
-                onClick={() => setOpen(true)}
-              >
-                <Settings2 className="size-4" />
-              </PrimaryButton>
-              <PrimaryButton
-                variant="secondary"
-                onClick={() => {
-                  setActiveCategory("");
-                  setSortBy("");
-                }}
-              >
-                <FilterX className="size-4" />
-              </PrimaryButton>
-            </div>
-          )}
+          <PrimaryButton
+            data-element="filter"
+            variant="secondary"
+            onClick={() => setOpen(true)}
+          >
+            <Settings2 className="size-4" />
+          </PrimaryButton>
+          <PrimaryButton
+            data-element="filter2"
+            className="mx-2"
+            variant="secondary"
+            onClick={() => {
+              setActiveCategory("");
+              setSortBy("");
+            }}
+          >
+            <FilterX className="size-4" />
+          </PrimaryButton>
           {isLoadingCuisines
             ? Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonButton key={i} />
@@ -179,6 +177,7 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
       <div className="p-4">
         <h2 className="font-bold text-4xl my-4">Рестораны</h2>
         <div className="">

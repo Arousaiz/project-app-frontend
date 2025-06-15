@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useResizeObserver } from "./use-resize";
 import { useIsMobile } from "./use-mobile";
 
-const GAP_SIZE = 17;
+const GAP_SIZE = 16;
 
 type UseOverflowButtonsOptions<T extends { id: string }> = {
   items?: T[];
@@ -45,18 +45,21 @@ export function useOverflowButtons<T extends { id: string }>({
     const elementWidths: number[] = [];
     let dropdownMenuWidth = 0;
     let filterButtonWidth = 0;
+    let filter2ButtonWidth = 0;
 
     for (let i = 0, l = containerChildren.length; i < l; i++) {
       const child = containerChildren[i];
       const clientRect = child.getBoundingClientRect();
       const { width } = clientRect;
-      const totalWidth = i > 0 ? GAP_SIZE + width : width;
+      const totalWidth = GAP_SIZE + width;
 
       const dataAttr = child.getAttribute("data-element");
       if (dataAttr === "dropdown") {
         dropdownMenuWidth = totalWidth;
       } else if (dataAttr === "filter") {
         filterButtonWidth = totalWidth;
+      } else if (dataAttr === "filter2") {
+        filter2ButtonWidth = totalWidth;
       } else {
         elementWidths.push(totalWidth);
       }
@@ -64,7 +67,10 @@ export function useOverflowButtons<T extends { id: string }>({
 
     const hiddenItemsMap: Record<string, boolean> = {};
     let remainingContainerWidth =
-      containerWidth - dropdownMenuWidth - filterButtonWidth;
+      containerWidth -
+      dropdownMenuWidth -
+      filterButtonWidth -
+      filter2ButtonWidth;
 
     items?.forEach((item, index) => {
       const itemWidth = elementWidths[index];

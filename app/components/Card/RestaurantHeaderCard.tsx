@@ -20,9 +20,9 @@ export default function RestaurantHeaderCard({
   const [open1, setOpen1] = useState(false);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["restaurantInfo"],
+    queryKey: ["restaurantInfo", id],
     queryFn: () => RestaurantService.findRestaurant(id),
-    enabled: open,
+    // enabled: open,
   });
 
   const {
@@ -35,18 +35,26 @@ export default function RestaurantHeaderCard({
     enabled: open1 && !!id,
   });
 
-  console.log(data);
-
   return (
     <div className="w-full max-w-7xl mx-auto p-4 md:p-6">
       <div className="relative rounded-3xl overflow-hidden aspect-[16/9] sm:aspect-[16/7] lg:aspect-[16/4] shadow-xl">
-        <ImageWithLoadingAndFallback
-          size="w-full h-full"
-          src="/app/assets/placeholder-image.jpg"
-          fallbackSrc="/app/assets/placeholder-image.jpg"
-          alt={`Изображение ресторана`}
-          className="w-full h-full object-cover"
-        ></ImageWithLoadingAndFallback>
+        {data?.data?.img_url ? (
+          <ImageWithLoadingAndFallback
+            size="w-full h-full"
+            src={`https://pub-96480823ba5d4f44bb4d8cd67febd2f1.r2.dev/${data.data.img_url}`}
+            fallbackSrc="/app/assets/placeholder-image.jpg"
+            alt="Изображение ресторана"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <ImageWithLoadingAndFallback
+            size="w-full h-full"
+            src=""
+            fallbackSrc="/app/assets/placeholder-image.jpg"
+            alt="Изображение ресторана"
+            className="w-full h-full object-cover"
+          />
+        )}
         <div className="absolute bottom-4 left-4 w-[calc(100%-2rem)]">
           <div className="flex gap-2 overflow-x-auto sm:overflow-visible flex-nowrap scrollbar-hide pr-2">
             <PrimaryButton
@@ -76,13 +84,15 @@ export default function RestaurantHeaderCard({
         id={id}
       ></RestaurantInfoModal>
       <Modal open={open1} onClose={() => setOpen1(false)}>
-        <div>
-          <p className="text-3xl font-bold text-center mb-4">
+        <div className="w-full">
+          <p className="text-2xl sm:text-3xl font-bold text-center mb-6">
             Отзывы от пользователей
           </p>
 
           {isLoading ? (
-            <div className="text-center my-10">Загрузка отзывов...</div>
+            <div className="text-center my-10 text-muted-foreground">
+              Загрузка отзывов...
+            </div>
           ) : isError ? (
             <div className="text-center my-10 text-red-500">
               Ошибка при загрузке отзывов
@@ -94,7 +104,7 @@ export default function RestaurantHeaderCard({
               ))}
             </div>
           ) : (
-            <div className="mt-10 mb-10 text-3xl font-bold text-center">
+            <div className="my-12 text-xl sm:text-2xl font-semibold text-center text-muted-foreground">
               Отзывы отсутствуют. Будьте первым!
             </div>
           )}

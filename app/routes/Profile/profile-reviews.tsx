@@ -22,13 +22,7 @@ export default function ProfileReviews() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteQuery<
-    ApiData<Reviews>, // тип ответа с пагинацией
-    unknown,
-    Reviews[], // данные после select — массив отзывов
-    [string], // query key
-    number // pageParam — offset
-  >({
+  } = useInfiniteQuery<ApiData<Reviews>, unknown, Reviews[], [string], number>({
     queryKey: ["profileReviews"],
     queryFn: ({ pageParam = 0 }) => ReviewService.fetchReviews(50, pageParam),
     getNextPageParam: (lastPage) => {

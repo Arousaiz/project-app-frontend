@@ -14,7 +14,7 @@ export default function PromotionModal({
       {selectedPromo && (
         <div className="space-y-4">
           <ImageWithLoadingAndFallback
-            src="/app/assets/placeholder-image.jpg"
+            src={`https://pub-96480823ba5d4f44bb4d8cd67febd2f1.r2.dev/${selectedPromo?.img_url}`}
             fallbackSrc="/app/assets/placeholder-image.jpg"
             alt={`Изображение акции ${selectedPromo?.title}`}
             className="rounded-xl h-full"
